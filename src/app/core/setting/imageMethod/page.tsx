@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { OcrSetting } from "./ocr";
 import { VlmSetting } from "./vlm";
 import useSettingStore from "@/stores/setting";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { Switch } from "@/components/ui/switch";
 import { Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item';
 import { Eye } from 'lucide-react';

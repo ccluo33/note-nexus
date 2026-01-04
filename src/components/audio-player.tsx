@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Play, Pause } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
-import { readFile, BaseDirectory } from '@tauri-apps/plugin-fs'
+import { readFile, BaseDirectory } from "@/lib/browser-adapter/fs"
 
 interface AudioPlayerProps {
   audioPath: string

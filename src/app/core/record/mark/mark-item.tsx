@@ -22,7 +22,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { appDataDir } from "@tauri-apps/api/path";
 import { ImageUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { open } from "@tauri-apps/plugin-shell";
+import { open } from "@/lib/browser-adapter/shell";
 import { Textarea } from "@/components/ui/textarea";
 import { AudioPlayer } from "@/components/audio-player";
 import { ImageViewer } from "@/components/image-viewer";

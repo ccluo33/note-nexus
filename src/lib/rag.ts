@@ -1,4 +1,4 @@
-import { readTextFile, readDir, BaseDirectory, DirEntry } from "@tauri-apps/plugin-fs";
+import { readTextFile, readDir, BaseDirectory, DirEntry } from "@/lib/browser-adapter/fs";
 import { fetchEmbedding, rerankDocuments } from "./ai";
 import { 
   upsertVectorDocument, 
@@ -13,8 +13,8 @@ export { initVectorDb };
 import { getFilePathOptions, getWorkspacePath } from "./workspace";
 import { DirTree } from "@/stores/article";
 import { toast } from "@/hooks/use-toast";
-import { join } from "@tauri-apps/api/path";
-import { Store } from "@tauri-apps/plugin-store";
+import { join } from "@/lib/browser-adapter/path";
+import { Store } from "@/lib/browser-adapter/store";
 
 /**
  * 文本分块函数，用于将大文本分成小块
@@ -119,7 +119,7 @@ export async function processMarkdownFile(
     const store = await Store.load('store.json')
     const chunkSize = await store.get<number>('ragChunkSize');
     const chunkOverlap = await store.get<number>('ragChunkOverlap');
-    const chunks = chunkText(content, chunkSize, chunkOverlap);
+    const chunks = chunkText(content, chunkSize || 1000, chunkOverlap || 200);
     // 文件名（不含路径）
     const filename = filePath.split('/').pop() || filePath;
     
@@ -180,6 +180,7 @@ async function getWorkspaceFiles(): Promise<DirTree[]> {
       // 创建DirTree对象
       const item: DirTree = {
         name: entry.name,
+        path: await join(dirPath, entry.name),
         isFile: !entry.isDirectory,
         isDirectory: entry.isDirectory,
         isSymlink: false, // Tauri FS API不直接提供isSymlink

@@ -20,13 +20,13 @@ import {
 } from "@/components/ui/tabs"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import { Label } from "@/components/ui/label"
 import dayjs, { Dayjs } from "dayjs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useTranslations } from "next-intl"
-import { writeTextFile } from "@tauri-apps/plugin-fs"
+import { writeTextFile, remove } from "@/lib/browser-adapter/fs"
 import { getFilePathOptions, getWorkspacePath } from "@/lib/workspace"
 import { toast } from "@/hooks/use-toast"
 import emitter from "@/lib/emitter"
@@ -254,7 +254,6 @@ export function OrganizeToolbar() {
           }
           
           // Delete old file
-          const { remove } = await import('@tauri-apps/plugin-fs')
           if (workspace.isCustom) {
             await remove(pathOptions.path)
           } else {

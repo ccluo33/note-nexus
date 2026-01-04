@@ -3,7 +3,7 @@ import { FormItem } from "../components/setting-base";
 import { useTranslations } from 'next-intl';
 import { useEffect } from "react";
 import useSettingStore from "@/stores/setting";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { OpenBroswer } from "@/components/open-broswer";
 import { SetDefault } from "./setDefault";
 

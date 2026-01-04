@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { SyncStateEnum, UserInfo } from "@/lib/sync/github.types";
 import useSyncStore from "@/stores/sync";
 import { getSyncRepoName } from "@/lib/sync/repo-utils";
-import { open } from '@tauri-apps/plugin-shell'
+import { open } from "@/lib/browser-adapter/shell"
 import Image from "next/image";
 import { Button } from "./ui/button";
 

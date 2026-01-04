@@ -7,7 +7,7 @@ import { fetchAiStream } from "@/lib/ai"
 import { TooltipButton } from "@/components/tooltip-button"
 import { useImperativeHandle, forwardRef, useRef } from "react"
 import { useTranslations } from "next-intl"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 
 interface TranslateSendProps {
   inputValue: string;

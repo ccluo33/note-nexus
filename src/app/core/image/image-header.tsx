@@ -6,7 +6,7 @@ import * as React from "react"
 import useImageStore from "@/stores/imageHosting"
 import {Separator} from "@/components/ui/separator"
 import {convertBytesToSize} from "@/lib/utils"
-import {open} from '@tauri-apps/plugin-shell';
+import {open} from "@/lib/browser-adapter/shell";
 import { RepoNames } from '@/lib/sync/github.types'
 import {
   Breadcrumb,
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from "react"
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 
 export function ImageHeader() {
   const t = useTranslations('image')

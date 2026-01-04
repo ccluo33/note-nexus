@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import { Globe } from "lucide-react"
 import {
   Popover,

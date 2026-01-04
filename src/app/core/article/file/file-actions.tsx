@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl"
 import * as React from "react"
 import useArticleStore from "@/stores/article"
 import { debounce } from "lodash-es"
-import { open as openDialog } from '@tauri-apps/plugin-dialog'
-import { readDir, copyFile, mkdir, exists } from '@tauri-apps/plugin-fs'
+import { open as openDialog } from "@/lib/browser-adapter/dialog"
+import { readDir, copyFile, mkdir, exists } from "@/lib/browser-adapter/fs"
 import { join } from '@tauri-apps/api/path'
 import { getWorkspacePath } from '@/lib/workspace'
 import { toast } from '@/hooks/use-toast'

@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { platform } from '@tauri-apps/plugin-os'
-import { getCurrentWindow } from '@tauri-apps/api/window'
+import { platform } from '@/lib/browser-adapter/app'
+import { getCurrentWindow } from '@/lib/browser-adapter/window'
 import { isMobileDevice } from '@/lib/check'
-import { Search, Settings, Minus, Square, X, PanelLeft, PanelLeftClose, PanelRight, PanelRightClose, Cog } from 'lucide-react'
+import { Search, Settings, X, PanelLeft, PanelLeftClose, PanelRight, PanelRightClose, Cog } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useSidebarStore } from '@/stores/sidebar'
@@ -68,23 +68,7 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
 
 
 
-  const handleMinimize = async () => {
-    try {
-      const window = getCurrentWindow()
-      await window.minimize()
-    } catch (error) {
-      console.error('Error minimizing window:', error)
-    }
-  }
 
-  const handleMaximize = async () => {
-    try {
-      const window = getCurrentWindow()
-      await window.toggleMaximize()
-    } catch (error) {
-      console.error('Error maximizing window:', error)
-    }
-  }
 
   const handleClose = async () => {
     try {
@@ -123,26 +107,28 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
         <div className="flex items-center gap-0.5 px-2 shrink-0" data-tauri-drag-region="false">
           <TooltipProvider>
             {recordToolbarConfig
-              .filter(item => item.enabled)
-              .sort((a, b) => a.order - b.order)
-              .map(item => {
-                switch (item.id) {
-                  case 'text':
-                    return <ControlText key={item.id} />
-                  case 'recording':
-                    return <ControlRecording key={item.id} />
-                  case 'scan':
-                    return <ControlScan key={item.id} />
-                  case 'image':
-                    return <ControlImage key={item.id} />
-                  case 'link':
-                    return <ControlLink key={item.id} />
-                  case 'file':
-                    return <ControlFile key={item.id} />
-                  default:
-                    return null
-                }
-              })}
+              ? recordToolbarConfig
+                .filter(item => item.enabled)
+                .sort((a, b) => a.order - b.order)
+                .map(item => {
+                  switch (item.id) {
+                    case 'text':
+                      return <ControlText key={item.id} />
+                    case 'recording':
+                      return <ControlRecording key={item.id} />
+                    case 'scan':
+                      return <ControlScan key={item.id} />
+                    case 'image':
+                      return <ControlImage key={item.id} />
+                    case 'link':
+                      return <ControlLink key={item.id} />
+                    case 'file':
+                      return <ControlFile key={item.id} />
+                    default:
+                      return null
+                  }
+                })
+              : null}
           </TooltipProvider>
         </div>
 
@@ -232,22 +218,6 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
         {/* Windows 控制按钮 */}
         {!isMacOS && (
           <div className="flex items-center shrink-0 relative z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-12 rounded-none hover:bg-accent"
-              onClick={handleMinimize}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-12 rounded-none hover:bg-accent"
-              onClick={handleMaximize}
-            >
-              <Square className="h-3.5 w-3.5" />
-            </Button>
             <Button
               variant="ghost"
               size="icon"

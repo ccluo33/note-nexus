@@ -4,7 +4,7 @@ import { ModelSelect } from "../components/model-select";
 import { Gauge, Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useState, useEffect } from "react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import useSettingStore from "@/stores/setting";
 
 export function Setting() {

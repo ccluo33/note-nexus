@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl'
 import { Clipboard, ClipboardX } from 'lucide-react'
 import { TooltipButton } from '@/components/tooltip-button'
 import { useState, useEffect } from 'react'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 
 export function ClipboardMonitor() {
   const t = useTranslations('record.chat.input.clipboardMonitor')
@@ -17,7 +17,7 @@ export function ClipboardMonitor() {
         const storedValue = await store.get<boolean>('clipboardMonitor')
         
         // Only update if the stored value exists and is different from the current state
-        if (storedValue !== undefined && storedValue !== isEnabled) {
+        if (storedValue !== undefined && storedValue !== null && storedValue !== isEnabled) {
           setIsEnabled(storedValue)
         }
       } catch (error) {

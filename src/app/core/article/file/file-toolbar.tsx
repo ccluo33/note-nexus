@@ -7,7 +7,7 @@ import {
 import * as React from "react"
 import { TooltipButton } from "@/components/tooltip-button"
 import useArticleStore from "@/stores/article"
-import { open } from '@tauri-apps/plugin-shell';
+import { open } from "@/lib/browser-adapter/shell";
 import useSettingStore from "@/stores/setting"
 import { RepoNames } from "@/lib/sync/github.types"
 import { GitlabInstanceType } from "@/lib/sync/gitlab.types"

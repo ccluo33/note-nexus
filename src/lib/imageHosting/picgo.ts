@@ -1,6 +1,6 @@
-import { Store } from "@tauri-apps/plugin-store";
-import { appDataDir } from '@tauri-apps/api/path'
-import { mkdir, exists, writeFile, remove } from "@tauri-apps/plugin-fs";
+import { Store } from "@/lib/browser-adapter/store";
+import { appDataDir } from '@/lib/browser-adapter/path'
+import { mkdir, exists, writeFile, remove } from "@/lib/browser-adapter/fs";
 import { v4 as uuid } from 'uuid';
 import { toast } from "@/hooks/use-toast";
 

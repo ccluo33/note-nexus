@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemDescription } from '@/components/ui/item';
 import { clearVectorDb, initVectorDb } from "@/db/vector";
 import { toast } from "@/hooks/use-toast";
-import { confirm } from "@tauri-apps/plugin-dialog";
+import { confirm } from "@/lib/browser-adapter/dialog";
 
 export function Settings() {
   const t = useTranslations('settings.rag');

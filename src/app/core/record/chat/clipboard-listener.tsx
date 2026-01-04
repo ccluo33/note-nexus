@@ -1,12 +1,12 @@
 'use client'
-import { clear, hasImage, hasText, readImageBase64, readText } from "tauri-plugin-clipboard-api";
+import { clear, hasImage, hasText, readImageBase64, readText } from "@/lib/browser-adapter/clipboard";
 import { useEffect, useRef } from 'react';
-import { BaseDirectory, exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { BaseDirectory, exists, mkdir, writeFile } from "@/lib/browser-adapter/fs";
+import { listen, UnlistenFn } from "@/lib/browser-adapter/event";
 import { v4 as uuid } from "uuid";
 import useChatStore from "@/stores/chat";
 import useTagStore from "@/stores/tag";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 
 export function ClipboardListener() {
   const { insert, chats, loading } = useChatStore()

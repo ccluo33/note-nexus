@@ -6,7 +6,7 @@ import { Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item';
 import { invoke } from '@tauri-apps/api/core';
-import { save, open } from '@tauri-apps/plugin-dialog';
+import { save, open } from "@/lib/browser-adapter/dialog";
 import { useToast } from "@/hooks/use-toast";
 import dayjs from 'dayjs';
 
@@ -22,7 +22,6 @@ export default function LocalBackup() {
 
       // 选择保存位置
       const filePath = await save({
-        title: t('exportDialog.title'),
         defaultPath: `note-gen-backup-${dayjs().format('YYYY-MM-DD_HH-mm-ss')}.zip`,
         filters: [{
           name: 'ZIP Files',

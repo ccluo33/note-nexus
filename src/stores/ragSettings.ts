@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { toast } from '@/hooks/use-toast';
 
 // RAG 设置参数接口
@@ -87,7 +87,7 @@ const useRagSettingsStore = create<RagSettingsState>((set) => ({
     } catch (error) {
       toast({
         title: '重置 RAG 设置失败',
-        description: error as string,
+        description: error instanceof Error ? error.message : String(error),
         variant: 'destructive',
       });
     }

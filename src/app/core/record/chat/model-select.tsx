@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { ModelConfig } from "../../setting/config"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import useSettingStore from "@/stores/setting"
 import { BotMessageSquare, BotOff } from "lucide-react"
 import {

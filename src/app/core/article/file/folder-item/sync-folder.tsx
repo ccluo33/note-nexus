@@ -1,9 +1,9 @@
 import { ContextMenuItem } from "@/components/ui/context-menu";
 import { RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { getFilePathOptions, getWorkspacePath } from "@/lib/workspace";
-import { readTextFile } from "@tauri-apps/plugin-fs";
+import { readTextFile } from "@/lib/browser-adapter/fs";
 import { uploadFile as uploadGithubFile } from '@/lib/sync/github';
 import { uploadFile as uploadGiteeFile } from '@/lib/sync/gitee';
 import { uploadFile as uploadGitlabFile } from '@/lib/sync/gitlab';

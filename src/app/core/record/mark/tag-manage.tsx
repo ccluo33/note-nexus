@@ -299,47 +299,49 @@ export function TagManage() {
                 <AccordionItemWrapper value={tag.id.toString()}>
                   <ContextMenu>
                     <ContextMenuTrigger>
-                      <AccordionTrigger 
-                        className={`px-3 py-2 hover:no-underline opacity-50 ${currentTagId === tag.id && 'bg-accent opacity-100'}`}
-                        onClick={() => {
-                          if (tag.id !== currentTagId) {
-                            handleSelectTag(tag)
-                          }
-                        }}
-                      >
-                        <div className="flex items-center gap-2 flex-1">
-                          {
-                            currentTagId === tag.id ? 
-                            <SquareCheck className="size-3" />:
-                            <TagIcon className="size-3" />
-                          }
-                          {editingTagId === tag.id ? (
-                            <Input
-                              value={editingName}
-                              onChange={(e) => setEditingName(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleRename(tag)
-                                if (e.key === 'Escape') setEditingTagId(null)
-                                e.stopPropagation()
-                              }}
-                              onClick={(e) => e.stopPropagation()}
-                              className="h-6 text-sm"
-                              autoFocus
-                            />
-                          ) : (
-                            <div className="text-xs w-full flex items-center justify-between gap-2">
-                              <span className={`flex-1 ${currentTagId === tag.id && 'font-bold'}`}>{tag.name}</span>
-                              <span className="text-muted-foreground">{tag.total && tag.total > 0 ? tag.total : ''}</span>
-                              <TagMobileActions 
-                                tag={tag}
-                                onRename={startEditing}
-                                onDelete={handleDeleteTag}
-                                isEditing={editingTagId === tag.id}
+                      <div className="flex items-center gap-2 flex-1 px-3 py-2 hover:bg-accent/50 rounded">
+                        <AccordionTrigger 
+                          className={`hover:no-underline flex-1 opacity-50 ${currentTagId === tag.id && 'opacity-100'}`}
+                          onClick={() => {
+                            if (tag.id !== currentTagId) {
+                              handleSelectTag(tag)
+                            }
+                          }}
+                        >
+                          <div className="flex items-center gap-2 flex-1">
+                            {
+                              currentTagId === tag.id ? 
+                              <SquareCheck className="size-3" />:
+                              <TagIcon className="size-3" />
+                            }
+                            {editingTagId === tag.id ? (
+                              <Input
+                                value={editingName}
+                                onChange={(e) => setEditingName(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleRename(tag)
+                                  if (e.key === 'Escape') setEditingTagId(null)
+                                  e.stopPropagation()
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="h-6 text-sm"
+                                autoFocus
                               />
-                            </div>
-                          )}
-                        </div>
-                      </AccordionTrigger>
+                            ) : (
+                              <div className="text-xs w-full flex items-center justify-between gap-2">
+                                <span className={`flex-1 ${currentTagId === tag.id && 'font-bold'}`}>{tag.name}</span>
+                                <span className="text-muted-foreground">{tag.total && tag.total > 0 ? tag.total : ''}</span>
+                              </div>
+                            )}
+                          </div>
+                        </AccordionTrigger>
+                        <TagMobileActions 
+                          tag={tag}
+                          onRename={startEditing}
+                          onDelete={handleDeleteTag}
+                          isEditing={editingTagId === tag.id}
+                        />
+                      </div>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
                       <ContextMenuItem disabled={editingTagId === tag.id} onClick={() => startEditing(tag)}>

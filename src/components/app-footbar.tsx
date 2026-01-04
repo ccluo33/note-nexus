@@ -3,7 +3,7 @@
 import { MessageSquare, Highlighter, SquarePen, Settings, User } from "lucide-react"
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from "@/lib/utils"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import { useTranslations } from 'next-intl'
 import { useSidebarStore } from "@/stores/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"

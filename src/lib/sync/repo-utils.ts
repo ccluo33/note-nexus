@@ -1,5 +1,5 @@
 import { RepoNames } from './github.types'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 
 /**
  * 获取实际使用的仓库名称

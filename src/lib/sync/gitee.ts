@@ -1,5 +1,5 @@
 import { toast } from '@/hooks/use-toast';
-import { Store } from '@tauri-apps/plugin-store';
+import { Store } from "@/lib/browser-adapter/store";
 import { v4 as uuid } from 'uuid';
 import { fetch, Proxy } from '@tauri-apps/plugin-http'
 // Remove unused imports - these types are not actually used in this file
@@ -186,7 +186,7 @@ export async function uploadFile(
   } catch (error) {
     toast({
       title: '同步失败',
-      description: (error as GiteeError).message,
+      description: error instanceof Error ? error.message : String(error),
       variant: 'destructive',
     })
   }

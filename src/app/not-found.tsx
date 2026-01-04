@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { isMobileDevice } from '@/lib/check';
-import { Store } from '@tauri-apps/plugin-store';
+import { Store } from "@/lib/browser-adapter/store";
 
 export default function NotFound() {
   const router = useRouter();

@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SquareCheckBig } from "lucide-react"
 import useSettingStore from "@/stores/setting";
 import { useState } from "react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { useEffect } from "react";
 
 export default function SyncPage() {

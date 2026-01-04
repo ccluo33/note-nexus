@@ -6,7 +6,7 @@ import { TagManage } from '@/app/core/record/mark/tag-manage'
 import useMarkStore from '@/stores/mark'
 import { MarkList } from '@/app/core/record/mark/mark-list'
 import { clearTrash } from '@/db/marks'
-import { confirm } from '@tauri-apps/plugin-dialog'
+import { confirm } from "@/lib/browser-adapter/dialog"
 
 export default function Record() {
   const t = useTranslations()

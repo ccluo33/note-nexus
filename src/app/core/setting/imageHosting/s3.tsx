@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import useImageStore from '@/stores/imageHosting';
 import { SyncStateEnum } from '@/lib/sync/github.types';
 import { testS3Connection } from '@/lib/imageHosting/s3';
-import { Store } from '@tauri-apps/plugin-store';
+import { Store } from "@/lib/browser-adapter/store";
 
 interface S3Config {
   accessKeyId: string

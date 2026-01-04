@@ -14,7 +14,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSub, Conte
 import { useState } from 'react'
 import { LoaderCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 
 export function ImageCard({file}: {file: GithubFile}) {
   const [loading, setLoading] = useState(false)

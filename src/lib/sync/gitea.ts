@@ -1,5 +1,5 @@
 import { toast } from '@/hooks/use-toast';
-import { Store } from '@tauri-apps/plugin-store';
+import { Store } from "@/lib/browser-adapter/store";
 import { v4 as uuid } from 'uuid';
 import { fetch, Proxy } from '@tauri-apps/plugin-http';
 import { fetch as encodeFetch } from './encode-fetch'
@@ -138,7 +138,7 @@ export async function uploadFile({
     console.error('Gitea 上传文件失败:', error);
     toast({
       title: '同步失败',
-      description: (error as GiteaError).message || '上传文件时发生错误',
+      description: error instanceof Error ? error.message : '上传文件时发生错误',
       variant: 'destructive',
     });
     throw error;
@@ -209,7 +209,7 @@ export async function getFiles({ path, repo }: { path: string; repo: string }) {
     console.error('Gitea 获取文件列表失败:', error);
     toast({
       title: '获取文件列表失败',
-      description: (error as GiteaError).message || '获取文件列表时发生错误',
+      description: error instanceof Error ? error.message : '获取文件列表时发生错误',
       variant: 'destructive',
     });
     throw error;
@@ -276,7 +276,7 @@ export async function deleteFile({ path, sha, repo }: { path: string; sha?: stri
     console.error('Gitea 删除文件失败:', error);
     toast({
       title: '删除文件失败',
-      description: (error as GiteaError).message || '删除文件时发生错误',
+      description: error instanceof Error ? error.message : '删除文件时发生错误',
       variant: 'destructive',
     });
     return null; // 确保在错误情况下也有返回值
@@ -375,7 +375,7 @@ export async function getFileContent({ path, ref, repo }: { path: string; ref: s
     console.error('Gitea 获取文件内容失败:', error);
     toast({
       title: '获取文件内容失败',
-      description: (error as GiteaError).message || '获取文件内容时发生错误',
+      description: error instanceof Error ? error.message : '获取文件内容时发生错误',
       variant: 'destructive',
     });
     throw error;
@@ -428,7 +428,7 @@ export async function getUserInfo(token?: string): Promise<GiteaUserInfo> {
     console.error('Gitea 获取用户信息失败:', error);
     toast({
       title: '获取用户信息失败',
-      description: (error as GiteaError).message || '获取用户信息时发生错误',
+      description: error instanceof Error ? error.message : '获取用户信息时发生错误',
       variant: 'destructive',
     });
     throw error;
@@ -523,7 +523,7 @@ export async function createSyncRepo(name: string, isPrivate: boolean = true): P
     console.error('Gitea 创建仓库失败:', error);
     toast({
       title: '创建仓库失败',
-      description: (error as GiteaError).message || '创建仓库时发生错误',
+      description: error instanceof Error ? error.message : '创建仓库时发生错误',
       variant: 'destructive',
     });
     return null;

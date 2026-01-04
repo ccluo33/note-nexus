@@ -64,6 +64,7 @@ export function ChatHeader() {
 
   // 获取指定分组的工具栏项
   const getToolbarItems = (group: 'topLeft' | 'topRight') => {
+    if (!chatToolbarConfigPc) return []
     return chatToolbarConfigPc
       .filter(item => TOOLBAR_GROUPS[group].includes(item.id) && item.enabled)
       .sort((a, b) => a.order - b.order)

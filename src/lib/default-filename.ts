@@ -1,4 +1,4 @@
-import { exists } from '@tauri-apps/plugin-fs'
+import { exists } from "@/lib/browser-adapter/fs"
 import { getFilePathOptions, getWorkspacePath } from './workspace'
 
 /**

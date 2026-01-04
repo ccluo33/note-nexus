@@ -2,13 +2,13 @@
 import useArticleStore from '@/stores/article'
 import { useEffect, useState, useRef } from 'react'
 import Vditor from 'vditor'
-import { exists, mkdir, writeFile, writeTextFile } from '@tauri-apps/plugin-fs'
+import { exists, mkdir, writeFile, writeTextFile } from "@/lib/browser-adapter/fs"
 import "vditor/dist/index.css"
 import CustomToolbar from './custom-toolbar'
 import './style.scss'
 import { useTheme } from 'next-themes'
 import { toast } from '@/hooks/use-toast'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { useTranslations } from 'next-intl'
 import { useI18n } from '@/hooks/useI18n'
 import emitter from '@/lib/emitter'
@@ -17,7 +17,7 @@ import { v4 as uuid } from 'uuid'
 import { convertImage } from '@/lib/utils'
 import CustomFooter from './custom-footer'
 import { useLocalStorage } from 'react-use'
-import { open } from '@tauri-apps/plugin-shell'
+import { open } from "@/lib/browser-adapter/shell"
 import { getWorkspacePath } from '@/lib/workspace'
 import { convertFileSrc } from "@tauri-apps/api/core";
 import useSettingStore from '@/stores/setting'

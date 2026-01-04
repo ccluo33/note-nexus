@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/tabs"
 import { useState, useImperativeHandle, forwardRef, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation";
 import dayjs, { Dayjs } from "dayjs"

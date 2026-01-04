@@ -8,7 +8,7 @@ import { MarkToolbar } from './mark-toolbar'
 import useMarkStore from "@/stores/mark"
 import { Button } from "@/components/ui/button"
 import { clearTrash } from "@/db/marks"
-import { confirm } from '@tauri-apps/plugin-dialog';
+import { confirm } from "@/lib/browser-adapter/dialog";
 
 export function NoteSidebar() {
   const t = useTranslations();

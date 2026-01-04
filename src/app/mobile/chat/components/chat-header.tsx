@@ -4,7 +4,7 @@ import { BotMessageSquare, BotOff, Check, Drama } from "lucide-react"
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { AiConfig, ModelConfig } from "../../../core/setting/config"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import useSettingStore from "@/stores/setting"
 import usePromptStore from "@/stores/prompt"
 import {

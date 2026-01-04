@@ -39,6 +39,7 @@ export function NewFile({ item }: NewFileProps) {
     if (currentFolder) {
       const newFile: DirTree = {
         name: '',
+        path: path ? `${path}/` : '',
         isFile: true,
         isSymlink: false,
         parent: currentFolder,

@@ -17,14 +17,14 @@ import { useState } from 'react'
 import useMarkStore from "@/stores/mark"
 import useTagStore from "@/stores/tag"
 import useChatStore from "@/stores/chat"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import { uint8ArrayToBase64, uploadFile as uploadGithubFile, getFiles as githubGetFiles, decodeBase64ToString } from "@/lib/sync/github"
 import { getFiles as giteeGetFiles, uploadFile as uploadGiteeFile } from "@/lib/sync/gitee"
 import { uploadFile as uploadGitlabFile, getFiles as gitlabGetFiles, getFileContent as gitlabGetFileContent } from "@/lib/sync/gitlab"
 import { uploadFile as uploadGiteaFile, getFiles as giteaGetFiles, getFileContent as giteaGetFileContent } from "@/lib/sync/gitea"
 import { getSyncRepoName } from "@/lib/sync/repo-utils"
 import { filterSyncData, mergeSyncData } from "@/config/sync-exclusions"
-import { confirm } from "@tauri-apps/plugin-dialog"
+import { confirm } from "@/lib/browser-adapter/dialog"
 
 export function SyncToggle() {
   const t = useTranslations()

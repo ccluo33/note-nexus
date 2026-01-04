@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { appDataDir } from '@tauri-apps/api/path';
+import { appDataDir } from '@/lib/browser-adapter/path';
 import { getWorkspacePath } from "./workspace";
 
 export function cn(...inputs: ClassValue[]) {

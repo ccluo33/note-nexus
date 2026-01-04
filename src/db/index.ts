@@ -1,8 +1,8 @@
 
-import Database from '@tauri-apps/plugin-sql';
+import { load } from '@/lib/browser-adapter/db';
 
 // 导出数据库实例
-export const db = await Database.load('sqlite:note.db');
+export const db = await load('note.db');
 
 // 获取数据库实例(兼容旧代码)
 export async function getDb() {

@@ -4,7 +4,7 @@ import { Eye, EyeOff, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslations } from 'next-intl';
 import useSettingStore from "@/stores/setting";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OpenBroswer } from "@/components/open-broswer";
 import dayjs from "dayjs";
@@ -70,7 +70,7 @@ export function GithubImageHosting() {
       setImageRepoState(SyncStateEnum.checking)
       const store = await Store.load('store.json');
       const accessToken = await store.get<string>('githubImageAccessToken')
-      const userInfo = await getUserInfo(accessToken);
+      const userInfo = await getUserInfo(accessToken ?? undefined);
       if (!userInfo) {
         setImageRepoState(SyncStateEnum.fail)
         return;

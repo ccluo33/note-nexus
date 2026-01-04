@@ -11,7 +11,7 @@ import { baseAiConfig } from "../config";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { BotMessageSquare, ChevronRight, Plus, Settings } from "lucide-react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { AiConfig } from "../config";
 import * as React from "react"
 import { v4 } from 'uuid';

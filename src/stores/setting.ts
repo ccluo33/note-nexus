@@ -1,11 +1,11 @@
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { create } from 'zustand'
-import { getVersion } from '@tauri-apps/api/app'
+import { getVersion } from '@/lib/browser-adapter/app'
 import { AiConfig } from '@/app/core/setting/config'
 import { GitlabInstanceType } from '@/lib/sync/gitlab.types'
 import { GiteaInstanceType } from '@/lib/sync/gitea.types'
 import { noteGenDefaultModels, noteGenModelKeys } from '@/app/model-config'
-import { fetch } from '@tauri-apps/plugin-http'
+import { fetch } from '@/lib/browser-adapter/http'
 
 export enum GenTemplateRange {
   All = 'all',
@@ -447,8 +447,9 @@ const useSettingStore = create<SettingState>((set, get) => ({
             set({ [key]: res as GenTemplate[] })
           }, 0);
         } else if (key === 'aiModelList' && hasNoteGenModels) {
-          // 如果已经有NoteGen模型，使用存储的配置
           set({ [key]: res as AiConfig[] })
+        } else if (key === 'workspaceHistory' || key === 'chatToolbarConfigPc' || key === 'chatToolbarConfigMobile' || key === 'recordToolbarConfig') {
+          set({ [key]: Array.isArray(res) ? res : [] })
         } else if (key !== 'aiModelList') {
           set({ [key]: res })
         }

@@ -12,7 +12,7 @@ import useVectorStore from "@/stores/vector"
 import { getContextForQuery } from '@/lib/rag'
 import { invoke } from "@tauri-apps/api/core"
 import { MarkdownFile } from "@/lib/files"
-import { readTextFile } from "@tauri-apps/plugin-fs"
+import { readTextFile } from "@/lib/browser-adapter/fs"
 import { getFilePathOptions, getWorkspacePath } from "@/lib/workspace"
 import { useMcpStore } from "@/stores/mcp"
 import { getOpenAIFunctions } from "@/lib/mcp/tools"

@@ -10,8 +10,8 @@ import { useTranslations } from 'next-intl'
 import { toast } from '@/hooks/use-toast'
 import { fetchAudioTranscription } from '@/lib/audio'
 import { useRouter } from 'next/navigation'
-import { open } from '@tauri-apps/plugin-dialog'
-import { readFile, writeFile, BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs'
+import { open } from "@/lib/browser-adapter/dialog"
+import { readFile, writeFile, BaseDirectory, exists, mkdir } from "@/lib/browser-adapter/fs"
 import { useRef } from 'react'
 import { isMobileDevice } from '@/lib/check'
 import { convertToWav } from '@/lib/audio-converter'

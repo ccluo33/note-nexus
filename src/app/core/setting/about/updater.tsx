@@ -9,8 +9,8 @@ import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { ArrowBigRightDash, Link, Loader2 } from 'lucide-react';
 import { getRelease } from '@/lib/sync/github';
-import { open } from '@tauri-apps/plugin-shell';
-import { isMobileDevice } from '@/lib/check';
+import { open } from "@/lib/browser-adapter/shell";
+import { isMobileDevice, isTauriEnvironment } from '@/lib/check';
 
 export default function Updater() {
     const t = useTranslations('settings.about');
@@ -24,6 +24,9 @@ export default function Updater() {
     async function checkUpdate() {
       setChecking(true);
       try {
+        if (!isTauriEnvironment()) {
+          return;
+        }
         setUpdate(await check({
           headers: {
             'X-AccessKey': 'wHi8Tkuc5i6v1UCAuVk48A',
@@ -38,7 +41,7 @@ export default function Updater() {
       } catch (error) {
         toast({
           title: t('checkError'),
-          description: error as string,
+          description: error instanceof Error ? error.message : String(error),
           variant: 'destructive'
         });
       } finally {
@@ -54,7 +57,7 @@ export default function Updater() {
         } catch (error) {
           toast({
             title: t('checkError'),
-            description: error as string,
+            description: error instanceof Error ? error.message : String(error),
             variant: 'destructive'
           });
         }

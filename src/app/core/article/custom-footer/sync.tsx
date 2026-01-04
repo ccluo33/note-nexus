@@ -6,10 +6,10 @@ import { getFileContent as getGitlabFileContent, uploadFile as uploadGitlabFile,
 import { uploadFile as uploadGiteaFile, getFiles as getGiteaFiles } from "@/lib/sync/gitea";
 import { getSyncRepoName } from "@/lib/sync/repo-utils";
 import useArticleStore from "@/stores/article";
-import { readFile } from "@tauri-apps/plugin-fs";
+import { readFile } from "@/lib/browser-adapter/fs";
 import { diffWordsWithSpace } from 'diff';
 import Vditor from "vditor";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { Button } from "@/components/ui/button";
 import useSettingStore from "@/stores/setting";
 import { useEffect, useState, useRef } from "react";

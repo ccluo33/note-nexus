@@ -1,8 +1,8 @@
 import { TooltipButton } from "@/components/tooltip-button"
 import { FilePlus } from "lucide-react"
 import { useTranslations } from 'next-intl'
-import { open } from '@tauri-apps/plugin-dialog';
-import { readTextFile } from "@tauri-apps/plugin-fs";
+import { open } from "@/lib/browser-adapter/dialog";
+import { readTextFile } from "@/lib/browser-adapter/fs";
 import useTagStore from "@/stores/tag";
 import useMarkStore from "@/stores/mark";
 import { insertMark } from "@/db/marks";
@@ -38,7 +38,8 @@ export function ControlFile() {
       }]
     });
     if (!filePath) return
-    await readFileByPath(filePath)
+    const path = Array.isArray(filePath) ? filePath[0] : filePath
+    await readFileByPath(path)
   }
 
   async function readFileByPath(path: string) {

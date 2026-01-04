@@ -66,7 +66,7 @@ export async function insertChat(chat: Omit<Chat, 'id' | 'createdAt'>) {
 // 获取所有 chats
 export async function getChats(tagId: number) {
   const db = await getDb()
-  const result = await db.select<Chat[]>(
+  const result = await db.select<Chat>(
     "select * from chats where tagId = $1 order by createdAt",
     [tagId]
   )
@@ -76,7 +76,7 @@ export async function getChats(tagId: number) {
 // 获取所有 chats（用于同步）
 export async function getAllChats() {
   const db = await getDb()
-  const result = await db.select<Chat[]>(
+  const result = await db.select<Chat>(
     "select * from chats order by createdAt",
     []
   )

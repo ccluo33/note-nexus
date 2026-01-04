@@ -1,6 +1,6 @@
 import { createWorker } from 'tesseract.js';
-import { readFile, BaseDirectory } from '@tauri-apps/plugin-fs';
-import { Store } from '@tauri-apps/plugin-store';
+import { readFile, BaseDirectory } from "@/lib/browser-adapter/fs";
+import { Store } from "@/lib/browser-adapter/store";
 
 export default async function ocr(path: string): Promise<string> {
   try {
@@ -14,7 +14,7 @@ export default async function ocr(path: string): Promise<string> {
 
     const workerPromise = (async () => {
       const image = await readFile(path, { baseDir: BaseDirectory.AppData });
-      const blob = new Blob([image])
+      const blob = new Blob([image.buffer as ArrayBuffer])
       const worker = await createWorker(langArr)
       const ret = (await worker.recognize(blob)).data.text;
       await worker.terminate();

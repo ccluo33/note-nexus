@@ -2,7 +2,7 @@ import { uploadImageByGithub } from "./github";
 import { uploadImageBySmms } from "./smms";
 import { uploadImageByPicgo } from "./picgo";
 import { uploadImageByS3 } from "./s3";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 
 export async function uploadImage(file: File) {
   const store = await Store.load('store.json');

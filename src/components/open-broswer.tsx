@@ -1,4 +1,4 @@
-import { open } from '@tauri-apps/plugin-shell';
+import { open } from "@/lib/browser-adapter/shell";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 

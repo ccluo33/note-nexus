@@ -1,7 +1,7 @@
 import { Tool, ToolResult } from '../types'
-import { mkdir, remove, exists, readDir } from '@tauri-apps/plugin-fs'
+import { mkdir, remove, exists, readDir } from "@/lib/browser-adapter/fs"
 import { getWorkspacePath, getFilePathOptions } from '@/lib/workspace'
-import { join } from '@tauri-apps/api/path'
+import { join } from '@/lib/browser-adapter/path'
 import useArticleStore from '@/stores/article'
 
 export const createFolderTool: Tool = {

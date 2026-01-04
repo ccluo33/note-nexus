@@ -1,4 +1,4 @@
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { create } from 'zustand'
 import { filterSyncData, mergeSyncData } from '@/config/sync-exclusions'
 import { uploadFile as uploadGithubFile, getFiles as githubGetFiles } from '@/lib/sync/github'

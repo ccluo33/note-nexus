@@ -7,7 +7,7 @@ import Chat from '../record/chat'
 import dynamic from 'next/dynamic'
 import { useSidebarStore } from "@/stores/sidebar"
 import { useEffect, useRef, useState } from 'react'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { ImperativePanelHandle } from 'react-resizable-panels'
 
 function getDefaultLayout() {

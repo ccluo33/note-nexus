@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useLocalStorage } from 'react-use';
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { v4 } from 'uuid';
-import { confirm } from '@tauri-apps/plugin-dialog';
+import { confirm } from "@/lib/browser-adapter/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {

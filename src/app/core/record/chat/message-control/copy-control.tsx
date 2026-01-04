@@ -3,7 +3,7 @@ import { Chat } from "@/db/chats"
 import { Copy, Check } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
-import { writeText } from "tauri-plugin-clipboard-api"
+import { writeText } from "@/lib/browser-adapter/clipboard"
 
 interface CopyControlProps {
   chat: Chat

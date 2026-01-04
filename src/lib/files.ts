@@ -1,6 +1,6 @@
-import { readDir, BaseDirectory, DirEntry } from "@tauri-apps/plugin-fs";
+import { readDir, BaseDirectory, DirEntry } from "@/lib/browser-adapter/fs";
 import { getFilePathOptions, getWorkspacePath } from "./workspace";
-import { join } from "@tauri-apps/api/path";
+import { join } from "@/lib/browser-adapter/path";
 
 export interface MarkdownFile {
   name: string;

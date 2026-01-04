@@ -20,7 +20,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { useRef } from "react";
 import { ScreenshotImage } from "note-gen/screenshot"
-import { BaseDirectory, writeFile } from "@tauri-apps/plugin-fs"
+import { BaseDirectory, writeFile } from "@/lib/browser-adapter/fs"
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import Image from 'next/image'

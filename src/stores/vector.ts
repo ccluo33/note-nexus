@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { initVectorDb, processAllMarkdownFiles, processMarkdownFile, checkEmbeddingModelAvailable } from '@/lib/rag';
 import { checkRerankModelAvailable } from '@/lib/ai';
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { toast } from '@/hooks/use-toast';
 
 interface VectorState {

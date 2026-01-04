@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { invoke } from '@tauri-apps/api/core'
 
 export enum WebDAVConnectionState {

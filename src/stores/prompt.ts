@@ -1,4 +1,4 @@
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { create } from 'zustand'
 
 export interface Prompt {

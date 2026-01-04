@@ -1,5 +1,5 @@
 'use client'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 import { useRouter  } from 'next/navigation'
 import { useEffect } from 'react'
 import { isMobileDevice } from '@/lib/check'

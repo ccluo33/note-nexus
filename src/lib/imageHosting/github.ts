@@ -1,4 +1,4 @@
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { fetch, Proxy } from '@tauri-apps/plugin-http'
 import { GithubError, GithubRepoInfo } from "../sync/github.types";
 import { toast } from '@/hooks/use-toast';
@@ -149,7 +149,7 @@ export async function uploadImageByGithub(file: File) {
   } catch (error) {
     toast({
       title: 'Upload image failed',
-      description: (error as GithubError).message,
+      description: error instanceof Error ? error.message : 'Upload image failed',
       variant: 'destructive',
     })
   }
@@ -199,10 +199,11 @@ export async function getImageFiles({ path }: { path: string }) {
       return null;
     }
   } catch (error) {
-    if ((error as GithubError).status !== 404) {
+    const githubError = error as GithubError;
+    if (!(error instanceof Error) || !githubError.status || githubError.status !== 404) {
       toast({
         title: '查询失败',
-        description: (error as GithubError).message,
+        description: error instanceof Error ? error.message : '查询失败',
         variant: 'destructive',
       })
     }

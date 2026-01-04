@@ -2,10 +2,10 @@ import { ContextMenuItem } from "@/components/ui/context-menu";
 import useArticleStore, { DirTree } from "@/stores/article";
 import { useTranslations } from "next-intl";
 import { computedParentPath, getCurrentFolder } from "@/lib/path";
-import { remove } from "@tauri-apps/plugin-fs";
+import { remove } from "@/lib/browser-adapter/fs";
 import { toast } from "@/hooks/use-toast";
 import { cloneDeep } from "lodash-es";
-import { ask } from '@tauri-apps/plugin-dialog';
+import { ask } from "@/lib/browser-adapter/dialog";
 import useSettingStore from '@/stores/setting';
 
 interface DeleteFolderProps {

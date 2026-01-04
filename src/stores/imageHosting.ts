@@ -1,7 +1,7 @@
 import { GithubFile } from '@/lib/sync/github';
 import { getImageFiles } from '@/lib/imageHosting/github';
 import { GithubRepoInfo, OctokitResponse, SyncStateEnum, UserInfo } from '@/lib/sync/github.types';
-import { Store } from '@tauri-apps/plugin-store';
+import { Store } from "@/lib/browser-adapter/store";
 import { create } from 'zustand'
 
 interface S3Config {

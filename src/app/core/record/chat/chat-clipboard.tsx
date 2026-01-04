@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { BaseDirectory, copyFile, exists, mkdir, readFile } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, copyFile, exists, mkdir, readFile } from "@/lib/browser-adapter/fs";
 import useTagStore from "@/stores/tag";
 import useSettingStore from "@/stores/setting";
 import useMarkStore from "@/stores/mark";
@@ -73,7 +73,7 @@ export function ChatClipboard({chat}: { chat: Chat }) {
     if (!chat.image) return
     const fromPath = chat.image.slice(1)
     const toPath = `image/${queueId}.png`
-    await copyFile(fromPath, toPath, { fromPathBaseDir: BaseDirectory.AppData, toPathBaseDir: BaseDirectory.AppData})
+    await copyFile(fromPath, toPath, { baseDir: BaseDirectory.AppData })
     let content = ''
     let desc = ''
     

@@ -7,7 +7,7 @@ import { GithubImageHosting } from "./github";
 import SMMSImageHosting from "./smms";
 import useImageStore from "@/stores/imageHosting";
 import { useEffect, useState } from "react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import PicgoImageHosting from "./picgo";
 import { S3ImageHosting } from "./s3";
 import { SettingSwitch } from "./setting-switch";

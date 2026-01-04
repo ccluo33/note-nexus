@@ -1,9 +1,9 @@
 'use client'
-import { clear, hasImage, hasText, readImageBase64, readText } from "tauri-plugin-clipboard-api";
+import { clear, hasImage, hasText, readImageBase64, readText } from "@/lib/browser-adapter/clipboard";
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { BaseDirectory, copyFile, exists, mkdir, readFile, writeFile } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, copyFile, exists, mkdir, readFile, writeFile } from "@/lib/browser-adapter/fs";
 import useTagStore from "@/stores/tag";
 import useSettingStore from "@/stores/setting";
 import useMarkStore from "@/stores/mark";
@@ -14,7 +14,7 @@ import { insertMark, Mark } from "@/db/marks";
 import { uint8ArrayToBase64, uploadFile } from "@/lib/sync/github";
 import { RepoNames } from "@/lib/sync/github.types";
 import { CheckCircle, CircleX } from "lucide-react";
-import { listen } from "@tauri-apps/api/event";
+import { listen } from "@/lib/browser-adapter/event";
 import { convertBytesToSize } from "@/lib/utils";
 
 export function Clipboard() {
@@ -63,7 +63,7 @@ export function Clipboard() {
     if (!isImageFolderExists) {
       await mkdir('image', { baseDir: BaseDirectory.AppData})
     }
-    await copyFile('clipboard.png', `image/${queueId}.png`, { fromPathBaseDir: BaseDirectory.AppData, toPathBaseDir: BaseDirectory.AppData})
+    await copyFile('clipboard.png', `image/${queueId}.png`, { baseDir: BaseDirectory.AppData })
     let content = ''
     let desc = ''
     

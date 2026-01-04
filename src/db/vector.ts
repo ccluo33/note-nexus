@@ -40,7 +40,7 @@ export async function upsertVectorDocument(doc: Omit<VectorDocument, 'id'>) {
 
 // 获取指定文件名的所有向量文档
 export async function getVectorDocumentsByFilename(filename: string) {
-  return await db.select<VectorDocument[]>(
+  return await db.select<VectorDocument>(
     "select * from vector_documents where filename = $1 order by chunk_id",
     [filename]);
 }
@@ -54,7 +54,7 @@ export async function deleteVectorDocumentsByFilename(filename: string) {
 
 // 检查文件是否已存在于向量数据库中
 export async function checkVectorDocumentExists(filename: string) {
-  const result = await db.select<{ count: number }[]>(
+  const result = await db.select<{ count: number }>(
     "select count(*) as count from vector_documents where filename = $1",
     [filename]);
   
@@ -68,7 +68,7 @@ export async function getSimilarDocuments(
   threshold: number = 0.7
 ): Promise<{id: number, filename: string, content: string, similarity: number}[]> {
   // 获取所有文档向量
-  const docs = await db.select<VectorDocument[]>(`
+  const docs = await db.select<VectorDocument>(`
     select id, filename, content, embedding from vector_documents
   `);
   
@@ -123,7 +123,7 @@ export async function clearVectorDb() {
 
 // 获取所有向量文档的文件名列表
 export async function getAllVectorDocumentFilenames() {
-  return await db.select<{filename: string}[]>(`
+  return await db.select<{filename: string}>(`
     select distinct filename from vector_documents
   `);
 }

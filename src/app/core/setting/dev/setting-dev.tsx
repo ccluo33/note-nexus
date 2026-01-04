@@ -3,10 +3,10 @@ import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemDescription, It
 import { Button } from "@/components/ui/button";
 import { useTranslations } from 'next-intl';
 import { useToast } from "@/hooks/use-toast";
-import { BaseDirectory, exists, remove } from "@tauri-apps/plugin-fs";
-import { confirm, message } from '@tauri-apps/plugin-dialog';
+import { BaseDirectory, exists, remove } from "@/lib/browser-adapter/fs";
+import { confirm, message } from "@/lib/browser-adapter/dialog";
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import SetConfig from "./set-config";

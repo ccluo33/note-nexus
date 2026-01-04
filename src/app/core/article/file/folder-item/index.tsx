@@ -1,7 +1,7 @@
 import { ContextMenu, ContextMenuContent, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import useArticleStore, { DirTree } from "@/stores/article";
-import { BaseDirectory, exists, mkdir, rename } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, exists, mkdir, rename } from "@/lib/browser-adapter/fs";
 import { ChevronRight, Cloud, Folder, FolderDot, FolderDown, FolderOpen, FolderOpenDot, Loader2 } from "lucide-react"
 import { useEffect, useRef, useState, useCallback } from "react";
 import { CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -67,6 +67,7 @@ export function FolderItem({ item }: { item: DirTree }) {
     if (currentFolder) {
       const newFile: DirTree = {
         name: '',
+        path: path ? `${path}/` : '',
         isFile: true,
         isSymlink: false,
         parent: currentFolder,
@@ -99,6 +100,7 @@ export function FolderItem({ item }: { item: DirTree }) {
     if (currentFolder) {
       const newFolder: DirTree = {
         name: '',
+        path: path ? `${path}/` : '',
         isFile: false,
         isSymlink: false,
         parent: currentFolder,
@@ -208,8 +210,7 @@ export function FolderItem({ item }: { item: DirTree }) {
         await rename(oldPathOptions.path, newPathOptions.path)
       } else {
         await rename(oldPathOptions.path, newPathOptions.path, { 
-          newPathBaseDir: BaseDirectory.AppData, 
-          oldPathBaseDir: BaseDirectory.AppData 
+          baseDir: BaseDirectory.AppData 
         })
       }
     } else {
@@ -285,13 +286,10 @@ export function FolderItem({ item }: { item: DirTree }) {
       
       // 根据工作区类型执行重命名操作
       if (workspace.isCustom) {
-        // 自定义工作区
         await rename(oldPathOptions.path, newPathOptions.path)
       } else {
-        // 默认工作区
         await rename(oldPathOptions.path, newPathOptions.path, { 
-          newPathBaseDir: BaseDirectory.AppData, 
-          oldPathBaseDir: BaseDirectory.AppData 
+          baseDir: BaseDirectory.AppData 
         })
       }
       
@@ -343,10 +341,10 @@ export function FolderItem({ item }: { item: DirTree }) {
   }, [item])
 
   return (
-    <CollapsibleTrigger className="w-full select-none">
-      <ContextMenu>
+    <ContextMenu>
+      <CollapsibleTrigger className="w-full select-none">
         <ContextMenuTrigger asChild>
-          <div className={`${isDragging ? 'file-on-drop' : ''} group file-manange-item flex select-none`}>
+          <div className={`${isDragging ? 'file-on-drop' : ''} group file-manange-item flex select-none items-center`}>
             <ChevronRight className="transition-transform size-4 ml-1 bg-sidebar group-hover:bg-transparent" />
             {
               isEditing ?
@@ -391,59 +389,59 @@ export function FolderItem({ item }: { item: DirTree }) {
                     </div>
                     <span className={`text-xs line-clamp-1 ${item.loading ? 'text-muted-foreground' : ''}`}>{item.name}</span>
                   </div>
-                  {isMobile && (
-                    <MobileActionMenu className="ml-1">
-                      <MobileMenuItem onClick={handleNewFile} disabled={!!item.sha && !item.isLocale}>
-                        {t('context.newFile')}
-                      </MobileMenuItem>
-                      <MobileMenuItem onClick={handleNewFolder} disabled={!!item.sha && !item.isLocale}>
-                        {t('context.newFolder')}
-                      </MobileMenuItem>
-                      <MobileMenuItem onClick={() => {}}>
-                        {t('context.viewDirectory')}
-                      </MobileMenuItem>
-                      <MobileSeparator />
-                      <MobileMenuItem disabled>
-                        {t('context.cut')}
-                      </MobileMenuItem>
-                      <MobileMenuItem disabled>
-                        {t('context.copy')}
-                      </MobileMenuItem>
-                      <MobileMenuItem disabled>
-                        {t('context.paste')}
-                      </MobileMenuItem>
-                      <MobileSeparator />
-                      <MobileMenuItem disabled>
-                        同步
-                      </MobileMenuItem>
-                      <MobileSeparator />
-                      <MobileMenuItem onClick={handleStartRename} disabled={!!item.sha && !item.isLocale}>
-                        {t('context.rename')}
-                      </MobileMenuItem>
-                      <MobileMenuItem disabled className="text-red-600">
-                        {t('context.delete')}
-                      </MobileMenuItem>
-                    </MobileActionMenu>
-                  )}
                 </div>
             }
           </div>
         </ContextMenuTrigger>
-        <ContextMenuContent>
-          <NewFile item={item} />
-          <NewFolder item={item} />
-          <ViewDirectory item={item} />
-          <ContextMenuSeparator />
-          <CutFolder item={item} />
-          <CopyFolder item={item} />
-          <PasteInFolder item={item} />
-          <ContextMenuSeparator />
-          <SyncFolder item={item} />
-          <ContextMenuSeparator />
-          <RenameFolder item={item} onStartRename={handleStartRename} />
-          <DeleteFolder item={item} />
-        </ContextMenuContent>
-      </ContextMenu>
-    </CollapsibleTrigger>
+      </CollapsibleTrigger>
+      {isMobile && (
+        <MobileActionMenu className="ml-1">
+          <MobileMenuItem onClick={handleNewFile} disabled={!!item.sha && !item.isLocale}>
+            {t('context.newFile')}
+          </MobileMenuItem>
+          <MobileMenuItem onClick={handleNewFolder} disabled={!!item.sha && !item.isLocale}>
+            {t('context.newFolder')}
+          </MobileMenuItem>
+          <MobileMenuItem onClick={() => {}}>
+            {t('context.viewDirectory')}
+          </MobileMenuItem>
+          <MobileSeparator />
+          <MobileMenuItem disabled>
+            {t('context.cut')}
+          </MobileMenuItem>
+          <MobileMenuItem disabled>
+            {t('context.copy')}
+          </MobileMenuItem>
+          <MobileMenuItem disabled>
+            {t('context.paste')}
+          </MobileMenuItem>
+          <MobileSeparator />
+          <MobileMenuItem disabled>
+            同步
+          </MobileMenuItem>
+          <MobileSeparator />
+          <MobileMenuItem onClick={handleStartRename} disabled={!!item.sha && !item.isLocale}>
+            {t('context.rename')}
+          </MobileMenuItem>
+          <MobileMenuItem disabled className="text-red-600">
+            {t('context.delete')}
+          </MobileMenuItem>
+        </MobileActionMenu>
+      )}
+      <ContextMenuContent>
+        <NewFile item={item} />
+        <NewFolder item={item} />
+        <ViewDirectory item={item} />
+        <ContextMenuSeparator />
+        <CutFolder item={item} />
+        <CopyFolder item={item} />
+        <PasteInFolder item={item} />
+        <ContextMenuSeparator />
+        <SyncFolder item={item} />
+        <ContextMenuSeparator />
+        <RenameFolder item={item} onStartRename={handleStartRename} />
+        <DeleteFolder item={item} />
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }

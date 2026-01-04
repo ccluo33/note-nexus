@@ -4,7 +4,7 @@ import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemDescription, It
 import { useTranslations } from 'next-intl';
 import Updater from "./updater";
 import { Bug, DownloadIcon, Github, HomeIcon, MessageSquare, SettingsIcon } from "lucide-react";
-import { open } from "@tauri-apps/plugin-shell";
+import { open } from "@/lib/browser-adapter/shell";
 import { Button } from "@/components/ui/button";
 
 export function SettingAbout({id, icon}: {id: string, icon?: React.ReactNode}) {

@@ -14,13 +14,13 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipButton } from "@/components/tooltip-button";
-import { open } from "@tauri-apps/plugin-shell";
+import { open } from "@/lib/browser-adapter/shell";
 import Vditor from "vditor";
 import emitter from "@/lib/emitter";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import useUsername from "@/hooks/use-username";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 
 dayjs.extend(relativeTime)
 

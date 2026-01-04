@@ -1,6 +1,6 @@
-import { BaseDirectory } from '@tauri-apps/plugin-fs'
-import { join } from '@tauri-apps/api/path'
-import { Store } from '@tauri-apps/plugin-store'
+import { BaseDirectory } from "@/lib/browser-adapter/fs"
+import { join } from '@/lib/browser-adapter/path'
+import { Store } from "@/lib/browser-adapter/store"
 
 /**
  * 获取当前工作区路径

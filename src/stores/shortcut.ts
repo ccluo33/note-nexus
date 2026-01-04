@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Store } from "@tauri-apps/plugin-store";
-import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
+import { Store } from "@/lib/browser-adapter/store";
+import { register, unregisterAll } from '@/lib/browser-adapter/shortcut';
 import emitter from '@/lib/emitter';
 
 interface Shortcut {
@@ -30,10 +30,8 @@ async function bindShortcut(shortcut: Shortcut) {
   await unregisterAll()
   try {
     if (shortcut.value) {
-      await register(shortcut.value, (event) => {
-        if (event.state === 'Pressed') {
-          emitter.emit(shortcut.key)
-        }
+      await register(shortcut.value, () => {
+        emitter.emit(shortcut.key)
       });
     }
   } catch (error) {

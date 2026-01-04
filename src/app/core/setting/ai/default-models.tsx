@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Gem, Move3D, Eye, MessageSquare } from "lucide-react";
 import Image from 'next/image';
-import { open } from '@tauri-apps/plugin-shell'
+import { open } from "@/lib/browser-adapter/shell"
 
 export default function DefaultModelsSection() {
   const t = useTranslations('settings.ai.defaultModels');

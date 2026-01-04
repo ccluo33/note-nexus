@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useTranslations } from 'next-intl';
 import { useEffect } from "react";
 import useSettingStore from "@/stores/setting";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 
 export function SetDefault({type}: {type: 'ocr' | 'vlm'}) {
   const t = useTranslations('settings.imageMethod');

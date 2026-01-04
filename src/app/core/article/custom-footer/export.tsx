@@ -6,8 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { save } from "@tauri-apps/plugin-dialog";
-import { writeTextFile, writeFile } from "@tauri-apps/plugin-fs";
+import { save } from "@/lib/browser-adapter/dialog";
+import { writeTextFile, writeFile } from "@/lib/browser-adapter/fs";
 import { SquareArrowOutUpRightIcon } from "lucide-react";
 import Vditor from "vditor";
 import jsPDF from "jspdf";

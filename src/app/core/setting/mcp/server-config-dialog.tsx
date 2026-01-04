@@ -108,7 +108,7 @@ export function ServerConfigDialog({
         toast({ description: t('testFailed'), variant: 'destructive' })
       }
     } catch (error) {
-      toast({ description: t('testFailed') + ': ' + error, variant: 'destructive' })
+      toast({ description: t('testFailed') + ': ' + (error instanceof Error ? error.message : String(error)), variant: 'destructive' })
     } finally {
       setTesting(false)
     }

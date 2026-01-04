@@ -4,7 +4,7 @@ import { uploadFile as uploadGiteeFile, getFiles as giteeGetFiles } from '@/lib/
 import { uploadFile as uploadGitlabFile, getFiles as gitlabGetFiles, getFileContent as gitlabGetFileContent } from '@/lib/sync/gitlab';
 import { uploadFile as uploadGiteaFile, getFiles as giteaGetFiles, getFileContent as giteaGetFileContent } from '@/lib/sync/gitea';
 import { getSyncRepoName } from '@/lib/sync/repo-utils';
-import { Store } from '@tauri-apps/plugin-store';
+import { Store } from "@/lib/browser-adapter/store";
 import { create } from 'zustand'
 
 export interface MarkQueue {

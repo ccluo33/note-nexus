@@ -1,11 +1,11 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import useArticleStore, { DirTree } from "@/stores/article";
-import { BaseDirectory, exists, readTextFile, remove, rename, writeTextFile } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, exists, readTextFile, remove, rename, writeTextFile } from "@/lib/browser-adapter/fs";
 import { Cloud, CloudDownload, File, ImageIcon } from "lucide-react"
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ask } from '@tauri-apps/plugin-dialog';
-import { Store } from '@tauri-apps/plugin-store';
+import { ask } from "@/lib/browser-adapter/dialog";
+import { Store } from "@/lib/browser-adapter/store";
 import { RepoNames } from "@/lib/sync/github.types";
 import { cloneDeep } from "lodash-es";
 import { openPath } from "@tauri-apps/plugin-opener";
@@ -249,12 +249,20 @@ export function FileItem({ item }: { item: DirTree }) {
         if (fileIndex !== undefined && fileIndex !== -1) {
           currentFolder.children[fileIndex].name = displayName
           currentFolder.children[fileIndex].isEditing = false
+          if (item.name === '') {
+            const parentPath = path.split('/').slice(0, -1).join('/')
+            currentFolder.children[fileIndex].path = parentPath ? `${parentPath}/${displayName}` : displayName
+          }
         }
       } else {
         const fileIndex = cacheTree.findIndex(file => file.name === item.name)
         if (fileIndex !== -1 && fileIndex !== undefined) {
           cacheTree[fileIndex].name = displayName
           cacheTree[fileIndex].isEditing = false
+          if (item.name === '') {
+            const parentPath = path.split('/').slice(0, -1).join('/')
+            cacheTree[fileIndex].path = parentPath ? `${parentPath}/${displayName}` : displayName
+          }
         }
       }
       
@@ -271,8 +279,7 @@ export function FileItem({ item }: { item: DirTree }) {
           await rename(oldPathOptions.path, newPathOptions.path)
         } else {
           await rename(oldPathOptions.path, newPathOptions.path, { 
-            newPathBaseDir: BaseDirectory.AppData, 
-            oldPathBaseDir: BaseDirectory.AppData 
+            baseDir: BaseDirectory.AppData 
           })
         }
       } else {

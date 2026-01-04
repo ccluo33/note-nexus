@@ -1,7 +1,7 @@
 import { Chat } from "@/db/chats"
 import useChatStore from "@/stores/chat"
 import { XIcon } from "lucide-react"
-import { clear, hasText, readText } from "tauri-plugin-clipboard-api"
+import { clear, hasText, readText } from "@/lib/browser-adapter/clipboard"
 import { useState } from "react"
 import { MessageInfo } from "./message-info"
 import { TranslateControl } from "./translate-control"

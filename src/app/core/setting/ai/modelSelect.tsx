@@ -16,7 +16,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { AiConfig } from "../config";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import emitter from "@/lib/emitter";
 
 export default function ModelSelect(

@@ -4,10 +4,10 @@
  */
 
 import CryptoJS from 'crypto-js'
-import { arch, platform } from '@tauri-apps/plugin-os'
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
-import { getVersion } from '@tauri-apps/api/app'
-import { invoke } from '@tauri-apps/api/core'
+import { arch, platform } from '@/lib/browser-adapter/app'
+import { fetch as tauriFetch } from '@/lib/browser-adapter/http'
+import { getVersion } from '@/lib/browser-adapter/app'
+import { invoke } from '@/lib/browser-adapter/core'
 
 // 配置常量
 const API_CONFIG = {
@@ -207,11 +207,9 @@ export async function reportEvent(
       console.log('Event reported successfully:', eventType)
       return true
     } else {
-      console.error('Failed to report event:', result)
       return false
     }
-  } catch (error) {
-    console.error('Error reporting event:', error)
+  } catch {
     return false
   }
 }

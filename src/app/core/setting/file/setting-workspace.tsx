@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { FormItem } from "../components/setting-base"
 import useSettingStore from "@/stores/setting"
-import { open as openDialog } from '@tauri-apps/plugin-dialog'
-import { BaseDirectory, exists, mkdir } from "@tauri-apps/plugin-fs"
+import { open as openDialog } from "@/lib/browser-adapter/dialog"
+import { BaseDirectory, exists, mkdir } from "@/lib/browser-adapter/fs"
 import { useTranslations } from 'next-intl'
 import useArticleStore from "@/stores/article"
 import { X, FolderOpen, History, Trash2, ChevronDown } from "lucide-react"

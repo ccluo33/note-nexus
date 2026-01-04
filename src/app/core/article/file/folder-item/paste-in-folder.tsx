@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { computedParentPath } from "@/lib/path";
 import useClipboardStore from "@/stores/clipboard";
 import { toast } from "@/hooks/use-toast";
-import { BaseDirectory, exists, mkdir, readDir, readTextFile, remove, writeTextFile } from "@tauri-apps/plugin-fs";
-import { ask } from '@tauri-apps/plugin-dialog';
+import { BaseDirectory, exists, mkdir, readDir, readTextFile, remove, writeTextFile } from "@/lib/browser-adapter/fs";
+import { ask } from "@/lib/browser-adapter/dialog";
 
 interface PasteInFolderProps {
   item: DirTree;

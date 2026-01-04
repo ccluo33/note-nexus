@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { usePathname, useRouter } from 'next/navigation'
 import AppStatus from "./app-status"
-import { Store } from "@tauri-apps/plugin-store"
+import { Store } from "@/lib/browser-adapter/store"
 import { PinToggle } from "./pin-toggle"
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from "react"

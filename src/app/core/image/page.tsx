@@ -10,7 +10,7 @@ import { NoData } from './no-data'
 import { v4 as uuid } from 'uuid'
 import { CheckCircle, LoaderCircle } from 'lucide-react'
 import { FolderCard } from './folder-card'
-import { Store } from '@tauri-apps/plugin-store'
+import { Store } from "@/lib/browser-adapter/store"
 
 interface FileUploader {
   id: string

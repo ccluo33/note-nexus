@@ -1,4 +1,4 @@
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { fetch } from "@tauri-apps/plugin-http";
 
 const BASE_URL = 'https://sm.ms/api/v2'

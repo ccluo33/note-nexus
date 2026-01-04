@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item';
 import { FileJson } from "lucide-react";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@/lib/browser-adapter/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { BaseDirectory, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
-import { Store } from "@tauri-apps/plugin-store";
-import { isMobileDevice } from "@/lib/check";
+import { BaseDirectory, copyFile, readTextFile } from "@/lib/browser-adapter/fs";
+import { Store } from "@/lib/browser-adapter/store";
+import { isMobileDevice, isTauriEnvironment } from "@/lib/check";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { useTranslations } from 'next-intl';
 
@@ -17,13 +17,14 @@ export default function SetConfig() {
         title: t('importConfigTitle'),
       })
       if (file) {
-        const content = await readTextFile(file, { baseDir: BaseDirectory.AppData })
+        const filePath = Array.isArray(file) ? file[0] : file
+        const content = await readTextFile(filePath, { baseDir: BaseDirectory.AppData })
         const jsonContent = JSON.parse(content)
         const store = await Store.load('store.json');
         Object.keys(jsonContent).forEach((key: string) => {
           store.set(key, jsonContent[key])
         })
-        if (isMobileDevice()) {
+        if (isMobileDevice() || !isTauriEnvironment()) {
           toast({
             description: t('importConfigSuccessMobile'),
           })
@@ -34,11 +35,10 @@ export default function SetConfig() {
     }
     async function handleExport() {
       const file = await save({
-        title: t('exportConfigTitle'),
         defaultPath: 'store.json',
       })
       if (file) {
-        await copyFile('store.json', file, { fromPathBaseDir: BaseDirectory.AppData })
+        await copyFile('store.json', file, { baseDir: BaseDirectory.AppData })
         toast({ title: t('exportConfigSuccess') })
       }
     }

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DownloadCloud, Loader2, UploadCloud } from "lucide-react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { uint8ArrayToBase64, uploadFile as uploadGithubFile, getFiles as githubGetFiles, decodeBase64ToString } from "@/lib/sync/github";
 import { getFiles as giteeGetFiles, uploadFile as uploadGiteeFile } from "@/lib/sync/gitee";
 import { uploadFile as uploadGitlabFile, getFiles as gitlabGetFiles, getFileContent as gitlabGetFileContent } from "@/lib/sync/gitlab";
@@ -8,9 +8,9 @@ import { uploadFile as uploadGiteaFile, getFiles as giteaGetFiles, getFileConten
 import { getSyncRepoName } from "@/lib/sync/repo-utils";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { isMobileDevice } from "@/lib/check";
+import { isMobileDevice, isTauriEnvironment } from "@/lib/check";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { confirm } from "@tauri-apps/plugin-dialog";
+import { confirm } from "@/lib/browser-adapter/dialog";
 import { useTranslations } from "next-intl";
 import useUsername from "@/hooks/use-username";
 import { filterSyncData, mergeSyncData } from "@/config/sync-exclusions";
@@ -155,7 +155,7 @@ export default function UploadStore() {
       await Promise.allSettled(keys.map(async key => await store.set(key, mergedSettings[key])))
       await store.save()
       
-      if (isMobileDevice()) {
+      if (isMobileDevice() || !isTauriEnvironment()) {
         toast({
           description: t('downloadSuccess'),
         })

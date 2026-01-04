@@ -1,5 +1,5 @@
 import { toast } from "@/hooks/use-toast";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import OpenAI from 'openai';
 import { AiConfig } from "@/app/core/setting/config";
 import { fetch } from "@tauri-apps/plugin-http";

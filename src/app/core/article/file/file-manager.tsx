@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react"
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
 import useArticleStore, { DirTree } from "@/stores/article"
-import { BaseDirectory, rename, writeTextFile, writeFile } from "@tauri-apps/plugin-fs"
+import { BaseDirectory, rename, writeTextFile, writeFile } from "@/lib/browser-adapter/fs"
 import { FileItem } from './file-item'
 import { FolderItem } from "./folder-item"
 import { computedParentPath } from "@/lib/path"
@@ -65,8 +65,7 @@ export function FileManager() {
       } else {
         // 默认工作区
         await rename(oldPathOptions.path, newPathOptions.path, { 
-          newPathBaseDir: BaseDirectory.AppData, 
-          oldPathBaseDir: BaseDirectory.AppData 
+          baseDir: BaseDirectory.AppData 
         })
       }
       
@@ -87,6 +86,7 @@ export function FileManager() {
           await writeTextFile(`article/${sanitizedFileName}`, text, { baseDir: BaseDirectory.AppData })
           addFile({
             name: sanitizedFileName,
+            path: `article/${sanitizedFileName}`,
             isEditing: false,
             isLocale: true,
             isDirectory: false,
@@ -94,13 +94,13 @@ export function FileManager() {
             isSymlink: false
           })
         } else if (file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)) {
-          // 处理图片文件，同样需要处理文件名以保持一致性
           const arrayBuffer = await file.arrayBuffer()
           const uint8Array = new Uint8Array(arrayBuffer)
           const sanitizedImageFileName = file.name.replace(/\s+/g, '_')
           await writeFile(`article/${sanitizedImageFileName}`, uint8Array, { baseDir: BaseDirectory.AppData })
           addFile({
             name: sanitizedImageFileName,
+            path: `article/${sanitizedImageFileName}`,
             isEditing: false,
             isLocale: true,
             isDirectory: false,

@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import useImageStore from "@/stores/imageHosting";
 import { checkPicgoState, type PicgoImageHostingSetting } from "@/lib/imageHosting/picgo";
 import { CheckCircle, LoaderCircle, XCircle } from "lucide-react";

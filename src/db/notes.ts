@@ -1,4 +1,4 @@
-import { BaseDirectory, exists, mkdir } from "@tauri-apps/plugin-fs"
+import { BaseDirectory, exists, mkdir } from "@/lib/browser-adapter/fs"
 import { getDb } from "./index"
 
 export interface Note {

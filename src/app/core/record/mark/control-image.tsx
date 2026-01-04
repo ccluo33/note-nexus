@@ -5,11 +5,11 @@ import { fetchAiDesc, fetchAiDescByImage } from "@/lib/ai"
 import ocr from "@/lib/ocr"
 import useMarkStore from "@/stores/mark"
 import useTagStore from "@/stores/tag"
-import { BaseDirectory, copyFile, exists, mkdir, readFile } from "@tauri-apps/plugin-fs"
+import { BaseDirectory, copyFile, exists, mkdir, readFile } from "@/lib/browser-adapter/fs"
 import { ImagePlus } from "lucide-react"
 import useSettingStore from "@/stores/setting"
 import { v4 as uuid } from 'uuid'
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from "@/lib/browser-adapter/dialog";
 import { uploadImage } from "@/lib/imageHosting"
 
 export function ControlImage() {
@@ -28,7 +28,8 @@ export function ControlImage() {
       }]
     });
     if (!filePaths) return
-    filePaths.forEach(async (path) => {
+    const paths = Array.isArray(filePaths) ? filePaths : [filePaths]
+    paths.forEach(async (path) => {
       await upload(path)
     })
   }
@@ -41,7 +42,7 @@ export function ControlImage() {
     if (!isImageFolderExists) {
       await mkdir('image', { baseDir: BaseDirectory.AppData})
     }
-    await copyFile(path, `image/${queueId}.${ext}`, { toPathBaseDir: BaseDirectory.AppData})
+    await copyFile(path, `image/${queueId}.${ext}`, { baseDir: BaseDirectory.AppData })
     const fileData = await readFile(path)
     const filename = `${queueId}.${ext}`
     let content = ''

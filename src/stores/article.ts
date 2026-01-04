@@ -6,9 +6,9 @@ import { GiteeFile } from '@/lib/sync/gitee'
 import { getSyncRepoName } from '@/lib/sync/repo-utils'
 import { getCurrentFolder } from '@/lib/path'
 import useVectorStore from './vector'
-import { join, appDataDir } from '@tauri-apps/api/path'
-import { BaseDirectory, DirEntry, exists, mkdir, readDir, readTextFile, writeTextFile, stat } from '@tauri-apps/plugin-fs'
-import { Store } from '@tauri-apps/plugin-store'
+import { join, appDataDir } from '@/lib/browser-adapter/path'
+import { BaseDirectory, DirEntry, exists, mkdir, readDir, readTextFile, writeTextFile, stat } from "@/lib/browser-adapter/fs"
+import { Store } from "@/lib/browser-adapter/store"
 import { cloneDeep, uniq } from 'lodash-es'
 import { create } from 'zustand'
 import { getFilePathOptions, getWorkspacePath, toWorkspaceRelativePath } from '@/lib/workspace'
@@ -236,8 +236,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
             const pathOptions = await getFilePathOptions(relPath)
             fileStat = await stat(pathOptions.path, { baseDir: pathOptions.baseDir })
           }
-          entry.createdAt = fileStat.birthtime?.toISOString()
-          entry.modifiedAt = fileStat.mtime?.toISOString()
+          entry.createdAt = fileStat.birthtime ? new Date(fileStat.birthtime).toISOString() : undefined
+          entry.modifiedAt = fileStat.mtime ? new Date(fileStat.mtime).toISOString() : undefined
         } catch {
           // 静默失败，不阻塞排序功能
         }
@@ -521,6 +521,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
               } else {
                 currentFolder?.children?.push({
                   name: file.name,
+                  path: itemPath,
                   isFile: file.type === 'file',
                   isSymlink: false,
                   parent: currentFolder,
@@ -538,6 +539,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
               } else {
                 (dirs as any).push({
                   name: file.name,
+                  path: file.name,
                   isFile: file.type === 'file',
                   isSymlink: false,
                   parent: undefined,
@@ -645,6 +647,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
     
     // 设置子节点（可能为空）
     currentFolder.children = children
+    currentFolder.loading = false
     set({ fileTree: cacheTree })
     
     // 异步加载远程同步文件状态（不阻塞界面）
@@ -713,6 +716,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
             } else {
               currentFolder.children?.push({
                 name: file.name,
+                path: file.path,
                 isFile: file.type === 'file',
                 isSymlink: false,
                 parent: currentFolder,
@@ -750,6 +754,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
     }
     const node = {
       name: '',
+      path: '',
       isFile: false,
       isDirectory: true,
       isSymlink: false,
@@ -795,6 +800,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
       if (currentFolder) {
         const newFile: DirTree = {
           name: '',
+          path: '',
           isFile: true,
           isSymlink: false,
           parent: currentFolder,
@@ -811,6 +817,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
       // 不存在 parent，直接在根目录下创建
       const newFile: DirTree = {
         name: '',
+        path: '',
         isFile: true,
         isSymlink: false,
         parent: undefined,
@@ -848,6 +855,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
     // 更新树
     const node = {
       name: file,
+      path: fullPath,
       isFile: true,
       isDirectory: false,
       isSymlink: false,
@@ -880,6 +888,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
     // 更新树
     const node = {
       name: '',
+      path: path ? `${path}/` : '',
       isFile: false,
       isDirectory: true,
       isSymlink: false,

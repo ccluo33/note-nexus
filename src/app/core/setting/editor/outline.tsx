@@ -2,7 +2,7 @@
 import { Item, ItemGroup, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from "react";
-import { Store } from "@tauri-apps/plugin-store";
+import { Store } from "@/lib/browser-adapter/store";
 import { Switch } from "@/components/ui/switch";
 import {
   Tabs,
