@@ -1,6 +1,4 @@
-import { GithubFile } from '@/lib/sync/github';
-import { getImageFiles } from '@/lib/imageHosting/github';
-import { GithubRepoInfo, OctokitResponse, SyncStateEnum, UserInfo } from '@/lib/sync/github.types';
+import { SyncStateEnum } from '@/lib/sync/github.types';
 import { Store } from "@/lib/browser-adapter/store";
 import { create } from 'zustand'
 
@@ -14,33 +12,32 @@ interface S3Config {
   pathPrefix?: string
 }
 
+interface FastDFSConfig {
+  trackerServer: string;
+  port: number;
+  httpUrl: string;
+  groupName?: string;
+  storagePath?: string;
+}
+
 interface MarkState {
   initMainHosting: () => Promise<void>
-  path: string
-  setPath: (path: string) => void
-
-  images: GithubFile[]
-  pushImage: (image: GithubFile) => void
-  deleteImage: (name: string) => void
-  getImages: () => Promise<void>
 
   // 主要图床
   mainImageHosting: string
   setMainImageHosting: (mainImageHosting: string) => Promise<void>
   
-  // 图床 Github 仓库
-  imageRepoUserInfo?: OctokitResponse<UserInfo>
-  setImageRepoUserInfo: (imageRepoUserInfo?: OctokitResponse<UserInfo>) => Promise<void>
-  imageRepoState: SyncStateEnum
-  setImageRepoState: (imageRepoState: SyncStateEnum) => void
-  imageRepoInfo?: GithubRepoInfo
-  setImageRepoInfo: (imageRepoInfo?: GithubRepoInfo) => void
-
   // S3 配置
   s3Config?: S3Config
   setS3Config: (config: S3Config) => Promise<void>
   s3State: SyncStateEnum
   setS3State: (state: SyncStateEnum) => void
+
+  // FastDFS 配置
+  fastDFSConfig?: FastDFSConfig
+  setFastDFSConfig: (config: FastDFSConfig) => Promise<void>
+  fastDFSState: SyncStateEnum
+  setFastDFSState: (state: SyncStateEnum) => void
 }
 
 const useImageStore = create<MarkState>((set, get) => ({
@@ -56,52 +53,21 @@ const useImageStore = create<MarkState>((set, get) => ({
     if (s3Config) {
       set({ s3Config })
     }
-  },
-  path: '',
-  setPath: (path) => set({ path }),
-
-  images: [],
-
-  pushImage: (image) => {
-    set(state => ({
-      images: [image, ...state.images]
-    }))
-  },
-  deleteImage: (name) => {
-    set(state => ({
-      images: state.images.filter(item => item.name !== name)
-    }))
-  },
-  async getImages() {
-    set({ images: [] })
-    const images = await getImageFiles({ path: get().path })
-    set({ images: images || [] })
+    
+    // 初始化 FastDFS 配置
+    const fastDFSConfig = await store.get<FastDFSConfig>('fastDFSConfig');
+    if (fastDFSConfig) {
+      set({ fastDFSConfig })
+    }
   },
 
   // 主要图床
-  mainImageHosting: 'github',
+  mainImageHosting: 'fastdfs',
   setMainImageHosting: async (mainImageHosting) => {
     set({ mainImageHosting })
     const store = await Store.load('store.json');
     await store.set('mainImageHosting', mainImageHosting)
     await store.save()
-  },
-
-  imageRepoUserInfo: undefined,
-  setImageRepoUserInfo: async (imageRepoUserInfo) => {
-    set({ imageRepoUserInfo })
-    if (!imageRepoUserInfo) return
-    const store = await Store.load('store.json');
-    await store.set('githubImageUsername', imageRepoUserInfo?.data?.login)
-    await store.save()
-  },
-  imageRepoState: SyncStateEnum.fail,
-  setImageRepoState: (imageRepoState) => {
-    set({ imageRepoState })
-  },
-  imageRepoInfo: undefined,
-  setImageRepoInfo: (imageRepoInfo) => {
-    set({ imageRepoInfo })
   },
 
   // S3 配置
@@ -115,6 +81,19 @@ const useImageStore = create<MarkState>((set, get) => ({
   s3State: SyncStateEnum.fail,
   setS3State: (s3State) => {
     set({ s3State })
+  },
+
+  // FastDFS 配置
+  fastDFSConfig: undefined,
+  setFastDFSConfig: async (config) => {
+    set({ fastDFSConfig: config })
+    const store = await Store.load('store.json');
+    await store.set('fastDFSConfig', config)
+    await store.save()
+  },
+  fastDFSState: SyncStateEnum.fail,
+  setFastDFSState: (fastDFSState) => {
+    set({ fastDFSState })
   },
 }))
 

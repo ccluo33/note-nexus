@@ -1,7 +1,5 @@
-import { uploadImageByGithub } from "./github";
-import { uploadImageBySmms } from "./smms";
-import { uploadImageByPicgo } from "./picgo";
 import { uploadImageByS3 } from "./s3";
+import { uploadImageByFastDFS } from "./fastdfs";
 import { Store } from "@/lib/browser-adapter/store";
 
 export async function uploadImage(file: File) {
@@ -21,14 +19,10 @@ export async function uploadImage(file: File) {
   }
   
   switch (mainImageHosting) {
-    case 'github':
-      return uploadImageByGithub(file)
-    case 'smms':
-      return uploadImageBySmms(file)
-    case 'picgo':
-      return uploadImageByPicgo(file)
     case 's3':
       return uploadImageByS3(file)
+    case 'fastdfs':
+      return uploadImageByFastDFS(file)
     default:
       return undefined
   }
