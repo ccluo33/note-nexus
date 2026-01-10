@@ -8,8 +8,7 @@ import { uploadFile as uploadGiteaFile, getFiles as giteaGetFiles, getFileConten
 import { getSyncRepoName } from "@/lib/sync/repo-utils";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { isMobileDevice, isTauriEnvironment } from "@/lib/check";
-import { relaunch } from "@tauri-apps/plugin-process";
+
 import { confirm } from "@/lib/browser-adapter/dialog";
 import { useTranslations } from "next-intl";
 import useUsername from "@/hooks/use-username";
@@ -155,13 +154,9 @@ export default function UploadStore() {
       await Promise.allSettled(keys.map(async key => await store.set(key, mergedSettings[key])))
       await store.save()
       
-      if (isMobileDevice() || !isTauriEnvironment()) {
-        toast({
-          description: t('downloadSuccess'),
-        })
-      } else {
-        relaunch()
-      }
+      toast({
+        description: t('downloadSuccess'),
+      })
     }
     setDownLoading(false)
   }

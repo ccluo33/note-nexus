@@ -1,27 +1,18 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { convertFileSrc } from "@tauri-apps/api/core";
-import { appDataDir } from '@/lib/browser-adapter/path';
-import { getWorkspacePath } from "./workspace";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
 export async function convertImage(path: string) {
-  const appDataDirPath = await appDataDir()
-  const imagePath = appDataDirPath + path
-  return convertFileSrc(imagePath)
+  // 网页版直接返回路径，由浏览器适配器处理
+  return path
 }
 
 export async function convertImageByWorkspace(path: string) {
-  const workspace = await getWorkspacePath()
-  if (workspace.isCustom) {
-    path = `${workspace.path}/${path}`
-  } else {
-    path = `${await appDataDir()}/article/${path}`
-  }
-  return convertFileSrc(path)
+  // 网页版直接返回路径，由浏览器适配器处理
+  return path
 }
 
 export function convertBytesToSize(bytes: number) {

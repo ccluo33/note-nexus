@@ -1,16 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react"
-import { usePathname, useRouter } from "next/navigation";
-import baseConfig from '../config'
 import { useTranslations } from 'next-intl'
+import baseConfig from '../config'
 import useSettingStore from "@/stores/setting"
 import { Separator } from "@/components/ui/separator";
 
-export function SettingTab() {
-  const [currentPage, setCurrentPage] = useState('about')
-  const router = useRouter()
-  const pathname = usePathname()
+export function SettingTab({ onTabChange, activeTab }: { onTabChange: (tab: string) => void, activeTab: string }) {
   const t = useTranslations('settings')
   const { setLastSettingPage } = useSettingStore()
   
@@ -24,21 +19,10 @@ export function SettingTab() {
   })
 
   function handleNavigation(anchor: string) {
-    setCurrentPage(anchor)
-    router.push(`/core/setting/${anchor}`)
+    onTabChange(anchor)
     // 记录最后访问的设置页面
     setLastSettingPage(anchor)
   }
-
-  useEffect(() => {
-    // 从当前URL路径中提取当前页面
-    const pageName = pathname.split('/').pop()
-    if (pageName && pageName !== 'setting') {
-      setCurrentPage(pageName)
-      // 记录最后访问的设置页面
-      setLastSettingPage(pageName)
-    }
-  }, [pathname, setLastSettingPage])
 
   return (
     <div className="flex flex-col w-56 justify-between h-full bg-sidebar border-r">
@@ -51,7 +35,7 @@ export function SettingTab() {
             return (
               <li
                 key={item.anchor}
-                className={currentPage === item.anchor ? '!bg-zinc-800 text-white setting-anchor' : 'setting-anchor'}
+                className={activeTab === item.anchor ? '!bg-zinc-800 text-white setting-anchor' : 'setting-anchor'}
                 onClick={() => handleNavigation(item.anchor)}
               >
                 {item.icon}

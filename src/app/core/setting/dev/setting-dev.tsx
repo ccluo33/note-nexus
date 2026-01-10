@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useToast } from "@/hooks/use-toast";
 import { BaseDirectory, exists, remove } from "@/lib/browser-adapter/fs";
 import { confirm, message } from "@/lib/browser-adapter/dialog";
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Store } from "@/lib/browser-adapter/store";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
@@ -27,11 +26,11 @@ export function SettingDev({id, icon}: {id: string, icon?: React.ReactNode}) {
       await store.clear()
       await remove('store.json', { baseDir: BaseDirectory.AppData })
       await remove('note.db', { baseDir: BaseDirectory.AppData })
-      message('数据已清理，请重启应用', {
-        title: '重启应用',
+      message('数据已清理，请刷新页面', {
+        title: '刷新页面',
         kind: 'info',
-      }).then(async () => {
-        await getCurrentWindow().close();
+      }).then(() => {
+        window.location.reload();
       })
     }
   }

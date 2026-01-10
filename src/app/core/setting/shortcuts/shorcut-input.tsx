@@ -4,7 +4,6 @@ import { ArrowBigUpIcon, CommandIcon, OptionIcon, RotateCcw, TrashIcon } from "l
 import { useEffect, useMemo, useRef, useState } from "react";
 import useShortcutStore from "@/stores/shortcut";
 import { Badge } from "@/components/ui/badge";
-import { platform } from "@tauri-apps/plugin-os";
 import hotkeys from 'hotkeys-js';
 import { useClickAway } from 'react-use'
 import { uniq } from "lodash-es";
@@ -20,8 +19,8 @@ export default function ShortcutsInput({
   const { shortcuts, setShortcut, resetDefault } = useShortcutStore()
   const [isFocus, setIsFocus] = useState(false)
   const [value, setValue] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const keys: string[] = []
+  const [keys, setKeys] = useState<string[]>([])
+  const inputRef = useRef<HTMLDivElement>(null)
 
   const shorcut = useMemo(() => {
     return shortcuts.find((shortcut) => shortcut.key === name)
@@ -29,7 +28,7 @@ export default function ShortcutsInput({
 
   const keyGroup = useMemo(() => value.split('+').filter((key) => key.length), [value])
 
-  async function init() {
+  function init() {
     setValue(shorcut?.value || '')
   }
 
@@ -38,24 +37,39 @@ export default function ShortcutsInput({
       setIsFocus(false)
       hotkeys.unbind('*')
       await setShortcut(name, value)
+      setKeys([])
     }
   })
 
   async function handleSetFocus() {
     if (disabled) return
     setIsFocus(true)
+    setKeys([])
     hotkeys('*', (event) => {
       let key = ''
       switch (event.key) {
         case 'Meta':
           key = 'CommandOrControl'
           break;
+        case 'Control':
+          key = 'CommandOrControl'
+          break;
+        case 'Shift':
+          key = 'Shift'
+          break;
+        case 'Alt':
+          key = 'Alt'
+          break;
         default:
           key = event.key.charAt(0).toUpperCase() + event.key.slice(1)
           break;
       }
-      keys.push(key)
-      setValue(uniq(keys).join('+'))
+      setKeys(prev => {
+        const newKeys = [...prev, key]
+        const uniqueKeys = uniq(newKeys)
+        setValue(uniqueKeys.join('+'))
+        return uniqueKeys
+      })
     })
   }
 
@@ -70,7 +84,9 @@ export default function ShortcutsInput({
 
   // 根据系统转化 CommandOrControl
   function transformKey(key: string) {
-    if (platform() === 'macos') {
+    // 使用 Web API 检测操作系统
+    const isMac = navigator.platform.toLowerCase().includes('mac')
+    if (isMac) {
       switch (key) {
         case 'CommandOrControl':
           return <CommandIcon className="size-3.5" />
@@ -94,7 +110,7 @@ export default function ShortcutsInput({
 
   useEffect(() => {
     init()
-  }, [shorcut, isFocus])
+  }, [shorcut])
 
   return <div className="flex items-center gap-2">
     <div

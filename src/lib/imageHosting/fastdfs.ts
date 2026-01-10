@@ -1,5 +1,4 @@
 import { Store } from "@/lib/browser-adapter/store";
-import { fetch, Proxy } from '@tauri-apps/plugin-http'
 import { toast } from '@/hooks/use-toast';
 import { v4 as uuid } from 'uuid';
 
@@ -16,15 +15,10 @@ export async function testFastDFSConnection(config: FastDFSConfig): Promise<bool
   try {
     // FastDFS 通常不提供直接的 REST API 进行连接测试
     // 这里我们尝试访问 HTTP 地址来验证基本连接
-    const store = await Store.load('store.json');
-    const proxyUrl = await store.get<string>('proxy')
-    const proxy: Proxy | undefined = proxyUrl ? { all: proxyUrl } : undefined
-
     const url = `${config.httpUrl}`;
     
     const response = await fetch(url, {
-      method: 'HEAD',
-      proxy
+      method: 'HEAD'
     });
 
     // 如果能成功访问 HTTP 地址，就认为连接成功
@@ -50,15 +44,11 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
       return undefined;
     }
     
-    const proxyUrl = await store.get<string>('proxy')
-    const proxy: Proxy | undefined = proxyUrl ? { all: proxyUrl } : undefined
-
     // 生成文件名
     const id = uuid();
     const ext = file.name.split('.').pop() || 'jpg';
     const filename = `${id}.${ext}`.replace(/\s/g, '_');
     const groupName = config.groupName || 'group1';
-    const storagePath = config.storagePath || 'M00/';
 
     // 注意：这里假设 FastDFS 服务器配置了 Nginx 模块，支持通过 HTTP 上传
     // 实际的 FastDFS 上传 API 可能需要特定的客户端库
@@ -71,8 +61,7 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
     
     const response = await fetch(uploadUrl, {
       method: 'POST',
-      body: formData,
-      proxy
+      body: formData
     });
     
     if (response.status === 200) {
@@ -92,7 +81,7 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
           } else if (jsonResult.filename) {
             return `${config.httpUrl}/${jsonResult.filename}`;
           }
-        } catch (e) {
+        } catch {
           // 如果不是 JSON 格式，直接返回结果
           return `${config.httpUrl}/${result}`;
         }

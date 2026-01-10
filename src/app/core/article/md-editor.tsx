@@ -12,14 +12,11 @@ import { Store } from "@/lib/browser-adapter/store"
 import { useTranslations } from 'next-intl'
 import { useI18n } from '@/hooks/useI18n'
 import emitter from '@/lib/emitter'
-import { appDataDir } from '@tauri-apps/api/path'
 import { v4 as uuid } from 'uuid'
-import { convertImage } from '@/lib/utils'
 import CustomFooter from './custom-footer'
 import { useLocalStorage } from 'react-use'
 import { open } from "@/lib/browser-adapter/shell"
 import { getWorkspacePath } from '@/lib/workspace'
-import { convertFileSrc } from "@tauri-apps/api/core";
 import useSettingStore from '@/stores/setting'
 import { uploadImage } from '@/lib/imageHosting'
 import FloatBar from './floatbar'
@@ -165,13 +162,12 @@ export function MdEditor() {
             // 保存到 activeFilePath/image 目录下
             const workspace = await getWorkspacePath()
             const articlePath = activeFilePath.split('/').slice(0, -1).join('/')
-            const appDataDirPath = await appDataDir()
             for (let i = 0; i < files.length; i++) {
               const uint8Array = new Uint8Array(await files[i].arrayBuffer())
               const fileName = `${uuid()}.${files[i].name.split('.')[files[i].name.split('.').length - 1]}`
               let imagesDir = ''
               if (!workspace.isCustom) {
-                imagesDir = `${appDataDirPath}/article/${articlePath}/${assetsPath}`
+                imagesDir = `/article/${articlePath}/${assetsPath}`
               } else {
                 imagesDir = `${workspace.path}/${articlePath}/${assetsPath}`
               }
@@ -264,30 +260,12 @@ export function MdEditor() {
 
   // 处理本地相对路径图片
   async function handleLocalImage(vditor: Vditor) {
-    const workspace = await getWorkspacePath()
     const previews = [vditor.vditor.ir?.element, vditor.vditor.sv?.element, vditor.vditor.wysiwyg?.element]
     previews.forEach(element => {
-      element?.querySelectorAll('img').forEach(async (img) => {
-        let src = img.getAttribute('src')
+      element?.querySelectorAll('img').forEach((img) => {
+        const src = img.getAttribute('src')
         if (!src) return
-        if (!src.startsWith('http') && !src.startsWith('asset://')) {
-          const articlePath = activeFilePath.split('/').slice(0, -1).join('/')
-          if (src.startsWith('./')) {
-            src = src.slice(2)
-          }
-          if (!src.startsWith('/')) {
-            src = `/${src}`
-          }
-          if (!workspace.isCustom) {
-            const relativePath = `/${workspace.path}/${articlePath}${src}`
-            const tauriSrc = await convertImage(relativePath)
-            img.setAttribute('src', tauriSrc)
-          } else {
-            const relativePath = `${workspace.path}/${articlePath}${src}`
-            const tauriSrc = convertFileSrc(relativePath)
-            img.setAttribute('src', tauriSrc)
-          }
-        }
+        // 网页版不需要特殊处理本地图片路径，直接使用相对路径
       })
     })
   }
@@ -295,8 +273,8 @@ export function MdEditor() {
   async function uploadImages(files: File[]) {
     const list = await Promise.all(
       files.map((file) => {
-        return new Promise<string>(async(resolve, reject) => {
-          if (!file.type.includes('image')) return
+        return new Promise<string | undefined>(async(resolve, reject) => {
+          if (!file.type.includes('image')) return resolve(undefined)
           const toastNotification = toast({
             title: t('upload.uploading'),
             description: file.name,
@@ -312,7 +290,7 @@ export function MdEditor() {
         });
       })
     );
-    return list
+    return list.filter(Boolean) as string[]
   }
 
   // 设置编辑器内容并滚动到匹配位置

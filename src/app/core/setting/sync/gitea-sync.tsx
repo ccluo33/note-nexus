@@ -52,7 +52,7 @@ export function GiteaSync() {
 
   // 获取实际使用的仓库名称
   const getRepoName = () => {
-    return giteaCustomSyncRepo.trim() || RepoNames.sync
+    return (giteaCustomSyncRepo || '').trim() || RepoNames.sync
   }
 
 
@@ -154,6 +154,7 @@ export function GiteaSync() {
       return giteaCustomUrl ? `${giteaCustomUrl}/user/settings/applications` : '#'
     }
     const instance = GITEA_INSTANCES[giteaInstanceType]
+    if (!instance) return '#'
     return `${instance.baseUrl}/user/settings/applications`
   }
 
@@ -162,7 +163,8 @@ export function GiteaSync() {
     if (giteaInstanceType === GiteaInstanceType.SELF_HOSTED) {
       return giteaCustomUrl || '自建实例'
     }
-    return GITEA_INSTANCES[giteaInstanceType].name
+    const instance = GITEA_INSTANCES[giteaInstanceType]
+    return instance ? instance.name : 'Gitea'
   }
 
   useEffect(() => {

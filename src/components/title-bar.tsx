@@ -1,14 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { platform } from '@/lib/browser-adapter/app'
-import { getCurrentWindow } from '@/lib/browser-adapter/window'
 import { isMobileDevice } from '@/lib/check'
-import { Search, Settings, X, PanelLeft, PanelLeftClose, PanelRight, PanelRightClose, Cog } from 'lucide-react'
+import { Search, Settings, PanelLeft, PanelLeftClose, PanelRight, PanelRightClose, Cog } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useSidebarStore } from '@/stores/sidebar'
-import { PinToggle } from './pin-toggle'
 import { SyncToggle } from './title-bar-toolbars/sync-toggle'
 import AppStatus from './app-status'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -23,14 +20,11 @@ import { ControlImage } from '@/app/core/record/mark/control-image'
 import { ControlLink } from '@/app/core/record/mark/control-link'
 import { ControlFile } from '@/app/core/record/mark/control-file'
 
-type Platform = 'macos' | 'windows' | 'linux' | 'unknown'
-
 interface TitleBarProps {
   onSearchClick?: () => void
 }
 
 export function TitleBar({ onSearchClick }: TitleBarProps) {
-  const [currentPlatform, setCurrentPlatform] = useState<Platform>('unknown')
   const [isMobile, setIsMobile] = useState(true)
   const pathname = usePathname()
   const router = useRouter()
@@ -47,64 +41,23 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
 
   const searchPlaceholder = getFileName() || t('navigation.searchPlaceholder')
 
-
   useEffect(() => {
     // 检查是否为移动设备
     setIsMobile(isMobileDevice())
-    
-    try {
-      const p = platform()
-      if (p === 'macos') {
-        setCurrentPlatform('macos')
-      } else if (p === 'windows') {
-        setCurrentPlatform('windows')
-      } else if (p === 'linux') {
-        setCurrentPlatform('linux')
-      }
-    } catch (error) {
-      console.error('Error detecting platform:', error)
-    }
   }, [])
-
-
-
-
-
-  const handleClose = async () => {
-    try {
-      const window = getCurrentWindow()
-      await window.close()
-    } catch (error) {
-      console.error('Error closing window:', error)
-    }
-  }
 
   // 移动端不显示标题栏
   if (isMobile) {
     return null
   }
 
-  // 平台未知时不显示
-  if (currentPlatform === 'unknown') {
-    return null
-  }
-
-  // macOS: 红绿灯按钮在左侧，拖拽区域需要避开
-  // Windows/Linux: 控制按钮在右侧，拖拽区域需要避开
-  const isMacOS = currentPlatform === 'macos'
-
   return (
     <TooltipProvider>
       <div
         className="h-[36px] w-full flex flex-nowrap items-center select-none shrink-0 fixed top-0 left-0 right-0 z-[9999] border-b bg-background"
-        style={{
-          // macOS 红绿灯按钮在左侧，需要留出空间（约 70px）
-          paddingLeft: isMacOS ? '70px' : '0',
-        }}
-        data-tauri-drag-region
       >
         {/* 左侧记录工具栏按钮 */}
-        <div className="flex items-center gap-0.5 px-2 shrink-0" data-tauri-drag-region="false">
+        <div className="flex items-center gap-0.5 px-2 shrink-0">
           <TooltipProvider>
             {recordToolbarConfig
               ? recordToolbarConfig
@@ -137,7 +90,6 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
           <div 
             className="relative w-full h-6 max-w-md group cursor-pointer flex justify-center items-center border rounded-sm"
             onClick={() => onSearchClick?.()}
-            data-tauri-drag-region="false"
           >
             <Search className="size-3.5 text-muted-foreground" />
             <div className="pl-2 text-xs text-muted-foreground transition-colors">
@@ -147,7 +99,7 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
         </div>
 
         {/* 右侧按钮 */}
-        <div className="flex items-center gap-0.5 px-2 shrink-0" data-tauri-drag-region="false">
+        <div className="flex items-center gap-0.5 px-2 shrink-0">
           {/* 左侧边栏切换按钮 */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -184,8 +136,6 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
           
           <SyncToggle />
           
-          <PinToggle />
-          
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -214,20 +164,6 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
           
           <AppStatus inTitlebar />
         </div>
-
-        {/* Windows 控制按钮 */}
-        {!isMacOS && (
-          <div className="flex items-center shrink-0 relative z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-12 rounded-none hover:bg-destructive hover:text-destructive-foreground"
-              onClick={handleClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
       </div>
     </TooltipProvider>
   )

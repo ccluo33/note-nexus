@@ -20,10 +20,6 @@ import {
 
 const baseConfig = [
   {
-    icon: <Store className="size-4 md:size-6" />,
-    anchor: 'about',
-  },
-  {
     icon: <Settings className="size-4 md:size-6" />,
     anchor: 'general',
   },
@@ -73,10 +69,6 @@ const baseConfig = [
   {
     icon: <FileCog className="size-4 md:size-6" />,
     anchor: 'editor',
-  },
-  {
-    icon: <KeyboardIcon className="size-4 md:size-6" />,
-    anchor: 'shortcuts',
   },
   {
     icon: <ScanText className="size-4 md:size-6" />,
@@ -139,7 +131,6 @@ const baseAiConfig: AiConfig[] = [
     key: 'siliconflow',
     title: 'SiliconFlow',
     baseURL: 'https://api.siliconflow.cn/v1',
-    icon: 'https://s2.loli.net/2025/09/09/D8Al2raSvewN5xn.jpg',
     apiKeyUrl: 'https://cloud.siliconflow.cn/i/O2ciJeZw'
   },
   {

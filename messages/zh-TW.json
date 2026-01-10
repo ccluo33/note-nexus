@@ -651,7 +651,7 @@
       "model": "模型",
       "defaultModels": {
         "title": "默認免費模型",
-        "desc": "NoteGen 為用戶提供免費的 AI 模型服務，由矽基流動提供支持，無需配置即可使用基礎功能。",
+        "desc": "",
         "chatModel": {
           "name": "Qwen/Qwen3-8B",
           "type": "對話模型",
@@ -666,8 +666,7 @@
           "name": "THUDM/GLM-4.1V-9B-Thinking",
           "type": "視覺模型",
           "desc": "支持圖像理解、OCR識別等視覺任務"
-        },
-        "poweredBy": "由 SiliconFlow 提供技術支援"
+        }
       }
     },
     "imageMethod": {

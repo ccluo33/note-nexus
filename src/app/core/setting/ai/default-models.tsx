@@ -4,8 +4,7 @@ import { useTheme } from 'next-themes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gem, Move3D, Eye, MessageSquare } from "lucide-react";
-import Image from 'next/image';
-import { open } from "@/lib/browser-adapter/shell"
+
 
 export default function DefaultModelsSection() {
   const t = useTranslations('settings.ai.defaultModels');
@@ -14,11 +13,6 @@ export default function DefaultModelsSection() {
   // 确定当前主题
   const currentTheme = theme === 'system' ? systemTheme : theme;
   const isDark = currentTheme === 'dark';
-  
-  // SiliconFlow 图片URL
-  const siliconFlowImageUrl = isDark 
-    ? 'https://s2.loli.net/2025/09/10/KWPOA5XhIGmYTV9.png'
-    : 'https://s2.loli.net/2025/09/10/gVhlriQ81PJabSY.png';
 
   const models = [
     {
@@ -43,10 +37,6 @@ export default function DefaultModelsSection() {
       color: 'bg-purple-500'
     }
   ];
-
-  function openInBrowser() {
-    open('https://cloud.siliconflow.cn/i/O2ciJeZw')
-  }
 
   return (
     <Card className="mb-6 relative">
@@ -83,15 +73,6 @@ export default function DefaultModelsSection() {
             </div>
           ))}
         </div>
-        <Image
-          src={siliconFlowImageUrl}
-          alt="SiliconFlow"
-          width={240}
-          height={60}
-          className="h-10 w-auto object-contain cursor-pointer hover:shadow"
-          unoptimized
-          onClick={openInBrowser}
-        />
       </CardContent>
     </Card>
   );

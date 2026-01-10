@@ -44,7 +44,7 @@ export function GiteeSync() {
 
   // 获取实际使用的仓库名称
   const getRepoName = () => {
-    return giteeCustomSyncRepo.trim() || RepoNames.sync
+    return (giteeCustomSyncRepo || '').trim() || RepoNames.sync
   }
 
 

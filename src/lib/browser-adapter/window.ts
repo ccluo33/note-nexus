@@ -92,6 +92,7 @@ class BrowserWindow {
     console.warn('Window setDecorations is not supported in browser mode');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async setAlwaysOnTop(_alwaysOnTop: boolean): Promise<void> {
     // 浏览器环境不支持设置始终置顶
     console.warn('Window setAlwaysOnTop is not supported in browser mode');

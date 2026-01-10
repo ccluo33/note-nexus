@@ -299,6 +299,7 @@
       "language": "语言",
       "checkUpdate": "检查更新",
       "checkError": "检查更新失败",
+      "checkUpdateSuccessWeb": "检查更新成功",
       "updateAvailable": "更新至最新版本",
       "updateDownloading": "更新中 {downloaded} / {contentLength}",
       "updateInstalled": "重启应用",
@@ -691,7 +692,7 @@
       "model": "模型",
       "defaultModels": {
         "title": "默认免费模型",
-        "desc": "NoteGen 为用户提供免费的 AI 模型服务，由硅基流动提供支持，无需配置即可使用基础功能。",
+        "desc": "",
         "chatModel": {
           "name": "Qwen/Qwen3-8B",
           "type": "对话模型",
@@ -706,8 +707,7 @@
           "name": "THUDM/GLM-4.1V-9B-Thinking",
           "type": "视觉模型",
           "desc": "支持图像理解、OCR识别等视觉任务"
-        },
-        "poweredBy": "由 SiliconFlow 提供技术支持"
+        }
       }
     },
     "imageMethod": {

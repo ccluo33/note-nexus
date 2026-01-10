@@ -440,7 +440,7 @@ const useSettingStore = create<SettingState>((set, get) => ({
       const res = await store.get(key)
 
       if (typeof value === 'function') return
-      if (res !== undefined && key !== 'version') {
+      if (res !== undefined && res !== null && key !== 'version') {
         if (key === 'templateList') {
           set({ [key]: [] })
           setTimeout(() => {

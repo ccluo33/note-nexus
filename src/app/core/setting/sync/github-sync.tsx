@@ -43,7 +43,7 @@ export function GithubSync() {
 
   // 获取实际使用的仓库名称
   const getRepoName = () => {
-    return githubCustomSyncRepo.trim() || RepoNames.sync
+    return (githubCustomSyncRepo || '').trim() || RepoNames.sync
   }
 
   // 检查 GitHub 仓库状态（仅检查，不创建）

@@ -690,7 +690,7 @@
       "voicePlaceholder": "Enter voice type, e.g.: alloy",
       "defaultModels": {
         "title": "Default Free Models",
-        "desc": "NoteGen provides free AI model services for users, enabling basic functionality without configuration.",
+        "desc": "",
         "chatModel": {
           "name": "Qwen/Qwen3-8B",
           "type": "Chat Model",
@@ -705,8 +705,7 @@
           "name": "THUDM/GLM-4.1V-9B-Thinking",
           "type": "Vision Model",
           "desc": "Supports image understanding and OCR recognition"
-        },
-        "poweredBy": "Powered by SiliconFlow"
+        }
       }
     },
     "ocr": {

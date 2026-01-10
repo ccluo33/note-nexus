@@ -5,8 +5,7 @@ import { open, save } from "@/lib/browser-adapter/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { BaseDirectory, copyFile, readTextFile } from "@/lib/browser-adapter/fs";
 import { Store } from "@/lib/browser-adapter/store";
-import { isMobileDevice, isTauriEnvironment } from "@/lib/check";
-import { relaunch } from "@tauri-apps/plugin-process";
+
 import { useTranslations } from 'next-intl';
 
 export default function SetConfig() {
@@ -24,13 +23,9 @@ export default function SetConfig() {
         Object.keys(jsonContent).forEach((key: string) => {
           store.set(key, jsonContent[key])
         })
-        if (isMobileDevice() || !isTauriEnvironment()) {
-          toast({
-            description: t('importConfigSuccessMobile'),
-          })
-        } else {
-          relaunch()
-        }
+        toast({
+        description: t('importConfigSuccessMobile'),
+      })
       }
     }
     async function handleExport() {

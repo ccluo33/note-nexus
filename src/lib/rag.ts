@@ -6,7 +6,6 @@ import {
   getSimilarDocuments,
   initVectorDb
 } from "@/db/vector";
-import { invoke } from "@tauri-apps/api/core";
 
 // 重新导出initVectorDb，使其可在其他模块中导入
 export { initVectorDb };
@@ -300,19 +299,7 @@ interface SearchItem {
   }[];
 }
 
-/**
- * fuzzy_search返回的结果结构
- */
-interface FuzzySearchResult {
-  item: SearchItem;
-  refindex: number;
-  score: number;
-  matches: {
-    key: string;
-    indices: [number, number][];
-    value: string;
-  }[];
-}
+
 
 /**
  * 从工作区中收集所有Markdown文件内容，用于模糊搜索
@@ -403,50 +390,40 @@ export async function getContextForQuery(keywords: Keyword[]): Promise<{ context
       const items = await collectMarkdownContents();
       if (items.length > 0) {
         // 为每个关键词单独进行搜索
+        // 实现简单的关键词匹配作为模糊搜索的替代
         for (const keyword of sortedKeywords) {
-          // 对每个关键词调用Rust的fuzzy_search函数
-          const fuzzyResults: FuzzySearchResult[] = await invoke('fuzzy_search', {
-            items,
-            query: keyword.text,  // 单独使用每个关键词
-            keys: ['title', 'article'],
-            threshold: 0.3, // 模糊搜索阈值
-            includeScore: true,
-            includeMatches: true
-          });
-          
-          // 处理模糊搜索结果
-          for (const result of fuzzyResults) {
-            if (result.score > 0) {
-              const item = result.item;
-              // 提取匹配的文本片段作为上下文
-              const articleMatches = result.matches.filter(m => m.key === 'article');
-              if (articleMatches.length > 0) {
-                // 使用匹配部分的上下文（周围大约500个字符）
-                const match = articleMatches[0];
-                const content = match.value;
-                
-                // 找到第一个匹配位置的索引
-                let startIdx = 0;
-                let endIdx = content.length;
-                if (match.indices.length > 0) {
-                  const firstMatch = match.indices[0];
-                  startIdx = Math.max(0, firstMatch[0] - 250);
-                  endIdx = Math.min(content.length, firstMatch[1] + 250);
-                }
-                
-                // 使用当前关键词的权重作为得分因子
-                const finalScore = result.score * keyword.weight;
-                
-                const contextSnippet = content.substring(startIdx, endIdx);
-                
-                allContexts.push({
-                  filename: item.title || '未命名文件',
-                  content: contextSnippet,
-                  score: finalScore,
-                  keyword: keyword.text,  // 记录匹配的关键词
-                  type: 'fuzzy'
-                });
+          for (const item of items) {
+            const articleContent = item.article || '';
+            // 检查标题或文章内容是否包含关键词
+            const titleMatch = item.title?.toLowerCase().includes(keyword.text.toLowerCase());
+            const articleMatch = articleContent.toLowerCase().includes(keyword.text.toLowerCase());
+            
+            if (titleMatch || articleMatch) {
+              // 计算简单的匹配分数
+              let baseScore = 0;
+              if (titleMatch) baseScore += 0.7;
+              if (articleMatch) baseScore += 0.3;
+              
+              // 使用当前关键词的权重作为得分因子
+              const finalScore = baseScore * keyword.weight;
+              
+              // 提取包含关键词的上下文
+              let contextSnippet = articleContent;
+              const keywordIndex = articleContent.toLowerCase().indexOf(keyword.text.toLowerCase());
+              if (keywordIndex !== -1) {
+                // 提取关键词周围的文本片段
+                const startIdx = Math.max(0, keywordIndex - 250);
+                const endIdx = Math.min(articleContent.length, keywordIndex + keyword.text.length + 250);
+                contextSnippet = articleContent.substring(startIdx, endIdx);
               }
+              
+              allContexts.push({
+                filename: item.title || '未命名文件',
+                content: contextSnippet,
+                score: finalScore,
+                keyword: keyword.text,  // 记录匹配的关键词
+                type: 'fuzzy'
+              });
             }
           }
         }

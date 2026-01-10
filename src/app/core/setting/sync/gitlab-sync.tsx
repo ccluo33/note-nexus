@@ -51,7 +51,7 @@ export function GitlabSync() {
 
   // 获取实际使用的仓库名称
   const getRepoName = () => {
-    return gitlabCustomSyncRepo.trim() || RepoNames.sync
+    return (gitlabCustomSyncRepo || '').trim() || RepoNames.sync
   }
 
 
@@ -129,6 +129,7 @@ export function GitlabSync() {
       return gitlabCustomUrl ? `${gitlabCustomUrl}/-/user_settings/personal_access_tokens` : '#'
     }
     const instance = GITLAB_INSTANCES[gitlabInstanceType]
+    if (!instance) return '#'
     return `${instance.baseUrl}/-/user_settings/personal_access_tokens`
   }
 
@@ -137,7 +138,8 @@ export function GitlabSync() {
     if (gitlabInstanceType === GitlabInstanceType.SELF_HOSTED) {
       return gitlabCustomUrl || '自建实例'
     }
-    return GITLAB_INSTANCES[gitlabInstanceType].name
+    const instance = GITLAB_INSTANCES[gitlabInstanceType]
+    return instance ? instance.name : 'GitLab'
   }
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { SyncStateEnum } from '@/lib/sync/github.types';
 import { Store } from "@/lib/browser-adapter/store";
 import { create } from 'zustand'
+import { GithubFile } from "@/lib/sync/github";
 
 interface S3Config {
   accessKeyId: string
@@ -38,9 +39,25 @@ interface MarkState {
   setFastDFSConfig: (config: FastDFSConfig) => Promise<void>
   fastDFSState: SyncStateEnum
   setFastDFSState: (state: SyncStateEnum) => void
+
+  // GitHub 图床配置
+  imageRepoState: SyncStateEnum
+  setImageRepoState: (state: SyncStateEnum) => void
+  imageRepoInfo: any
+  setImageRepoInfo: (info: any) => void
+  imageRepoUserInfo: any
+  setImageRepoUserInfo: (info: any) => void
+
+  // 图片管理
+  images: GithubFile[]
+  path: string
+  getImages: () => void
+  setPath: (path: string) => void
+  pushImage: (image: GithubFile) => void
+  deleteImage: (image: GithubFile) => void
 }
 
-const useImageStore = create<MarkState>((set, get) => ({
+const useImageStore = create<MarkState>((set) => ({
   initMainHosting: async () => {
     const store = await Store.load('store.json');
     const mainImageHosting = await store.get<string>('mainImageHosting')
@@ -94,6 +111,40 @@ const useImageStore = create<MarkState>((set, get) => ({
   fastDFSState: SyncStateEnum.fail,
   setFastDFSState: (fastDFSState) => {
     set({ fastDFSState })
+  },
+
+  // GitHub 图床配置
+  imageRepoState: SyncStateEnum.fail,
+  setImageRepoState: (state) => {
+    set({ imageRepoState: state })
+  },
+  imageRepoInfo: undefined,
+  setImageRepoInfo: (info) => {
+    set({ imageRepoInfo: info })
+  },
+  imageRepoUserInfo: undefined,
+  setImageRepoUserInfo: (info) => {
+    set({ imageRepoUserInfo: info })
+  },
+
+  // 图片管理
+  images: [],
+  path: '',
+  getImages: () => {
+    // 暂时为空实现，后续可根据实际需求添加逻辑
+  },
+  setPath: (path) => {
+    set({ path })
+  },
+  pushImage: (image) => {
+    set((state) => ({
+      images: [...state.images, image]
+    }))
+  },
+  deleteImage: (image) => {
+    set((state) => ({
+      images: state.images.filter((img) => img.url !== image.url)
+    }))
   },
 }))
 

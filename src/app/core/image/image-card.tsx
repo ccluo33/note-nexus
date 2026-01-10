@@ -29,7 +29,7 @@ export function ImageCard({file}: {file: GithubFile}) {
     const res = await deleteFile({path: file.path, sha: file.sha, repo: RepoNames.image, token, username})
     if (res) {
       toast({ title: '文件已删除', description: file.name })
-      deleteImage(file.name)
+      deleteImage(file)
     } else {
       toast({ title: '文件删除失败' })
     }
