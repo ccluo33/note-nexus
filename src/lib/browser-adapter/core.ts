@@ -75,6 +75,40 @@ export async function invoke<T>(command: string, args?: any): Promise<T> {
         body = JSON.stringify(args);
         break;
       
+      case 'fastdfs_upload':
+        // FastDFS上传命令
+        url = `${FULL_API_URL}/fastdfs/upload`;
+        method = 'POST';
+        // 处理文件上传，需要使用FormData
+        if (args && args.file) {
+          const formData = new FormData();
+          formData.append('file', args.file);
+          // 添加http_url参数
+          if (args.http_url) {
+            formData.append('http_url', args.http_url);
+          }
+          // 这里需要特殊处理，不使用JSON.stringify，直接传递FormData
+          return new Promise((resolve, reject) => {
+            fetch(url, {
+              method,
+              headers: {
+                'Accept': 'application/json',
+              },
+              body: formData,
+            })
+            .then(res => res.json())
+            .then(data => resolve(data as T))
+            .catch(err => reject(err));
+          });
+        }
+        break;
+      
+      case 'fastdfs_delete':
+        // FastDFS删除命令
+        url = `${FULL_API_URL}/fastdfs/delete/${args?.file_id}`;
+        method = 'DELETE';
+        break;
+      
       case 'rank_keywords':
         // 关键词排名，在浏览器环境中返回空数组
         return [] as T;

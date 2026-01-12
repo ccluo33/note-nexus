@@ -161,113 +161,36 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
     const filename = `${id}.${ext}`.replace(/\s/g, '_');
     const groupName = config.groupName || 'group1';
 
-    // 注意：这里假设 FastDFS 服务器配置了 Nginx 模块，支持通过 HTTP 上传
-    // 实际的 FastDFS 上传 API 可能需要特定的客户端库
-    // 这里使用简化的 HTTP 上传方式
-    const uploadUrl = `${config.httpUrl}/upload`;
-    
-    console.log('Uploading image to FastDFS:', uploadUrl);
+      // 使用后端API进行FastDFS上传，通过invoke函数调用
+    console.log('Uploading image to FastDFS via backend API');
     console.log('FastDFS Config:', config);
     
-    // 准备表单数据
-    const formData = new FormData();
-    formData.append('file', file, filename);
-    
-    // 浏览器环境下的特殊处理
-    let response;
-    let timeoutId: NodeJS.Timeout | undefined;
     try {
-      // 验证上传 URL 格式
-      let parsedUrl;
-      try {
-        parsedUrl = new URL(uploadUrl);
-        console.log('FastDFS upload URL:', parsedUrl.toString());
-      } catch (urlError) {
-        console.error('FastDFS upload URL 格式错误:', uploadUrl);
-        const errorMsg = 'FastDFS 配置错误：上传 URL 格式不正确，请检查 httpUrl 配置';
-        toast({
-          title: '上传失败',
-          description: errorMsg,
-          variant: 'destructive',
-        });
-        
-        // 提供 base64 作为备用方案
-        console.log('Falling back to base64 encoding...');
-        return await convertToBase64(file);
-      }
-      
-      // 添加超时控制，避免请求无限期等待
-      const controller = new AbortController();
-      timeoutId = setTimeout(() => {
-        console.error('FastDFS upload timeout after 10 seconds');
-        controller.abort();
-      }, 10000);
-      
-      response = await fetch(uploadUrl, {
-        method: 'POST',
-        body: formData,
-        // 允许跨域请求
-        credentials: 'omit',
-        // 添加 CORS 相关的请求头
-        headers: {
-          // 注意：使用 FormData 时，浏览器会自动设置正确的 Content-Type
-          'Accept': '*/*',
-        },
-        // 添加超时控制
-        signal: controller.signal,
+      // 调用后端API上传文件，传递http_url参数
+      const result = await invoke<any>('fastdfs_upload', {
+        file,
+        http_url: config.httpUrl
       });
       
-      // 清除超时定时器
-      clearTimeout(timeoutId);
+      console.log('FastDFS upload result from backend:', result);
       
-      console.log('FastDFS upload response:', response.status, response.statusText);
-      
-      if (response.status === 200) {
-        // 解析 FastDFS 上传返回的格式，通常为 group1/M00/00/00/xxxxxx.jpg
-        const result = await response.text();
-        
-        console.log('FastDFS upload result:', result);
-        
-        // 检查返回格式是否符合 FastDFS 标准
-        if (result.startsWith(`${groupName}/`)) {
-          // 构建完整的访问 URL
-          const imageUrl = `${config.httpUrl}/${result}`;
-          console.log('FastDFS uploaded image URL:', imageUrl);
+      if (result && result.status === 'success') {
+        // 后端已经返回了完整的访问URL，直接使用
+        if (result.url) {
+          console.log('FastDFS uploaded image URL:', result.url);
+          return result.url;
+        } else if (result.file_id) {
+          // 作为备选，使用file_id和http_url构建完整URL
+          const imageUrl = `${config.httpUrl}/${result.file_id}`;
+          console.log('FastDFS uploaded image URL (constructed):', imageUrl);
           return imageUrl;
-        } else {
-          // 尝试解析 JSON 格式的返回结果（有些 FastDFS HTTP 服务器可能返回 JSON）
-          try {
-            const jsonResult = JSON.parse(result);
-            console.log('FastDFS upload JSON result:', jsonResult);
-            
-            if (jsonResult.url) {
-              return jsonResult.url;
-            } else if (jsonResult.filename) {
-              return `${config.httpUrl}/${jsonResult.filename}`;
-            }
-          } catch (jsonError) {
-            console.error('Failed to parse FastDFS upload result as JSON:', jsonError);
-            // 如果不是 JSON 格式，直接返回结果
-            const imageUrl = `${config.httpUrl}/${result}`;
-            console.log('FastDFS uploaded image URL (raw result):', imageUrl);
-            return imageUrl;
-          }
         }
       }
       
-      const errorText = await response.text();
-      console.error('FastDFS upload failed:', response.status, errorText);
+      console.error('FastDFS upload failed with result:', result);
       
       // 提供更详细的错误信息
-      let errorMsg = `上传失败：${response.status} ${errorText}`;
-      if (response.status === 403) {
-        errorMsg = '上传失败：服务器拒绝访问，可能是权限问题或 CORS 限制';
-      } else if (response.status === 404) {
-        errorMsg = '上传失败：上传路径不存在，请检查 FastDFS 服务器配置';
-      } else if (response.status >= 500) {
-        errorMsg = `上传失败：服务器错误：${response.status} ${errorText}`;
-      }
-      
+      const errorMsg = result?.message || '上传失败：服务器返回异常结果';
       toast({
         title: 'FastDFS 上传失败',
         description: errorMsg,
@@ -279,37 +202,23 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
       return await convertToBase64(file);
       
     } catch (fetchError) {
-      // 清除超时定时器
-      if (timeoutId) clearTimeout(timeoutId);
+      // 浏览器环境下的错误处理
+      console.error('FastDFS 上传失败（后端API调用）:', fetchError);
       
-      if (typeof window !== 'undefined') {
-        // 浏览器环境下的错误处理
-        console.error('FastDFS 上传失败（浏览器环境）:', fetchError);
-        
-        let errorMsg = '浏览器环境限制：FastDFS 上传功能可能因 CORS 限制而无法使用';
-        if (fetchError instanceof TypeError) {
-          if (fetchError.message.includes('Failed to fetch')) {
-            errorMsg = `网络连接错误：无法连接到 FastDFS 服务器。请检查：1. 服务器地址和端口是否正确；2. 网络连接是否正常；3. 服务器是否配置了正确的 CORS 头；4. 服务器防火墙是否允许您的 IP 访问。上传 URL: ${uploadUrl}`;
-          } else if (fetchError.message.includes('AbortError')) {
-            errorMsg = '上传超时：FastDFS 服务器响应超时，请检查服务器状态或网络连接';
-          } else {
-            errorMsg = `上传失败：${fetchError.message}`;
-          }
-        } else if (fetchError instanceof Error) {
-          errorMsg = `上传失败：${fetchError.message}`;
-        }
-        
-        toast({
-          title: 'FastDFS 上传失败，使用本地存储',
-          description: `${errorMsg}，已自动切换为本地图片存储`,
-          variant: 'destructive',
-        });
-        
-        // 提供 base64 作为备用方案
-        console.log('Falling back to base64 encoding...');
-        return await convertToBase64(file);
+      let errorMsg = '上传失败：调用后端API时发生错误';
+      if (fetchError instanceof Error) {
+        errorMsg = `上传失败：${fetchError.message}`;
       }
-      throw fetchError;
+      
+      toast({
+        title: 'FastDFS 上传失败，使用本地存储',
+        description: `${errorMsg}，已自动切换为本地图片存储`,
+        variant: 'destructive',
+      });
+      
+      // 提供 base64 作为备用方案
+      console.log('Falling back to base64 encoding...');
+      return await convertToBase64(file);
     }
     
   } catch (error) {
