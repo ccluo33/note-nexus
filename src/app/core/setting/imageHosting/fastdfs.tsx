@@ -107,7 +107,6 @@ export function FastDFSImageHosting() {
         toast({
           title: '连接成功',
           description: 'FastDFS 服务器连接测试通过',
-          variant: 'success',
         });
       } else {
         setFastDFSState(SyncStateEnum.fail);

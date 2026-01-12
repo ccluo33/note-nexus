@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import webdav, mcp, device, fetch_url, fastdfs
+from app.api.v1.endpoints import webdav, mcp, device, fetch_url, fastdfs, vector
 
 # 创建 API 路由器
 router = APIRouter()
@@ -18,3 +18,6 @@ router.include_router(fetch_url.router, prefix="/fetch", tags=["Fetch URL"])
 
 # 注册 FastDFS 相关路由
 router.include_router(fastdfs.router, prefix="/fastdfs", tags=["FastDFS"])
+
+# 注册向量存储相关路由
+router.include_router(vector.router, prefix="/vector", tags=["Vector Storage"])

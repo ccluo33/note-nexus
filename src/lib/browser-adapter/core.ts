@@ -83,9 +83,10 @@ export async function invoke<T>(command: string, args?: any): Promise<T> {
         if (args && args.file) {
           const formData = new FormData();
           formData.append('file', args.file);
-          // 添加http_url参数
-          if (args.http_url) {
-            formData.append('http_url', args.http_url);
+          // 添加完整的FastDFS配置
+          if (args.config) {
+            // 将配置转换为JSON字符串，因为FormData只能处理字符串和Blob
+            formData.append('config', JSON.stringify(args.config));
           }
           // 这里需要特殊处理，不使用JSON.stringify，直接传递FormData
           return new Promise((resolve, reject) => {
@@ -107,6 +108,32 @@ export async function invoke<T>(command: string, args?: any): Promise<T> {
         // FastDFS删除命令
         url = `${FULL_API_URL}/fastdfs/delete/${args?.file_id}`;
         method = 'DELETE';
+        break;
+      
+      case 'vector_upload':
+        // 向量上传命令
+        url = `${FULL_API_URL}/vector/upload`;
+        method = 'POST';
+        body = JSON.stringify(args);
+        break;
+      
+      case 'vector_similar':
+        // 相似文档查询命令
+        url = `${FULL_API_URL}/vector/similar`;
+        method = 'POST';
+        body = JSON.stringify(args);
+        break;
+      
+      case 'vector_delete':
+        // 向量删除命令
+        url = `${FULL_API_URL}/vector/${args?.filename}`;
+        method = 'DELETE';
+        break;
+      
+      case 'vector_exists':
+        // 检查向量是否存在命令
+        url = `${FULL_API_URL}/vector/exists/${args?.filename}`;
+        method = 'GET';
         break;
       
       case 'rank_keywords':

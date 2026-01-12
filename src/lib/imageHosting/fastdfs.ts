@@ -1,4 +1,5 @@
 import { Store } from "@/lib/browser-adapter/store";
+import { invoke } from "@/lib/browser-adapter/core";
 import { toast } from '@/hooks/use-toast';
 import { v4 as uuid } from 'uuid';
 
@@ -132,6 +133,15 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
     const store = await Store.load('store.json');
     const config = await store.get<FastDFSConfig>('fastDFSConfig');
     
+    // 打印当前FastDFS配置
+    console.log('\n=== FastDFS 配置信息 ===');
+    console.log('trackerServer:', config?.trackerServer);
+    console.log('port:', config?.port);
+    console.log('httpUrl:', config?.httpUrl);
+    console.log('groupName:', config?.groupName);
+    console.log('storagePath:', config?.storagePath);
+    console.log('======================\n');
+    
     if (!config) {
       const errorMsg = 'FastDFS 配置错误：请先配置 FastDFS 参数';
       console.error(errorMsg);
@@ -166,15 +176,34 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
     console.log('FastDFS Config:', config);
     
     try {
-      // 调用后端API上传文件，传递http_url参数
+      // 调用后端API上传文件，传递完整的FastDFS配置
       const result = await invoke<any>('fastdfs_upload', {
         file,
-        http_url: config.httpUrl
+        config: {
+          trackerServer: config.trackerServer,
+          port: config.port,
+          httpUrl: config.httpUrl,
+          groupName: config.groupName,
+          storagePath: config.storagePath
+        }
       });
       
       console.log('FastDFS upload result from backend:', result);
       
-      if (result && result.status === 'success') {
+      // 检查结果是否有效
+      if (!result || typeof result !== 'object') {
+        console.error('FastDFS upload failed: Invalid response from server', result);
+        toast({
+          title: 'FastDFS 上传失败',
+          description: '服务器返回无效响应，已自动切换为本地图片存储',
+          variant: 'destructive',
+        });
+        // 提供 base64 作为备用方案
+        console.log('Falling back to base64 encoding...');
+        return await convertToBase64(file);
+      }
+      
+      if (result.status === 'success') {
         // 后端已经返回了完整的访问URL，直接使用
         if (result.url) {
           console.log('FastDFS uploaded image URL:', result.url);
@@ -184,18 +213,26 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
           const imageUrl = `${config.httpUrl}/${result.file_id}`;
           console.log('FastDFS uploaded image URL (constructed):', imageUrl);
           return imageUrl;
+        } else {
+          // 结果成功但缺少URL信息
+          console.error('FastDFS upload success but missing URL information:', result);
+          toast({
+            title: 'FastDFS 上传异常',
+            description: '服务器返回成功但缺少URL信息，已自动切换为本地图片存储',
+            variant: 'destructive',
+          });
         }
+      } else {
+        // 上传失败，显示详细错误信息
+        console.error('FastDFS upload failed with result:', result);
+        // 提供更详细的错误信息
+        const errorMsg = result.message || result.detail || '上传失败：服务器返回异常结果';
+        toast({
+          title: 'FastDFS 上传失败',
+          description: errorMsg,
+          variant: 'destructive',
+        });
       }
-      
-      console.error('FastDFS upload failed with result:', result);
-      
-      // 提供更详细的错误信息
-      const errorMsg = result?.message || '上传失败：服务器返回异常结果';
-      toast({
-        title: 'FastDFS 上传失败',
-        description: errorMsg,
-        variant: 'destructive',
-      });
       
       // 提供 base64 作为备用方案
       console.log('Falling back to base64 encoding...');

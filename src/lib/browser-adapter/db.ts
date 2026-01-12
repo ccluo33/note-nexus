@@ -80,6 +80,20 @@ class IndexedDBDatabase implements Database {
     }
   }
 
+  // SQL表名到IndexedDB对象存储名称的映射
+  private tableNameMap: Record<string, string> = {
+    'vector_documents': 'vector',
+    'chats': 'chats',
+    'marks': 'marks',
+    'notes': 'notes',
+    'tags': 'tags'
+  };
+
+  // 获取实际的对象存储名称
+  private getActualStoreName(tableName: string): string {
+    return this.tableNameMap[tableName] || tableName;
+  }
+
   async execute(query: string, bindValues?: any[]): Promise<{ lastInsertId?: number; rowsAffected?: number; rows: any[] }> {
     await this.ensureInit();
     
@@ -108,11 +122,12 @@ class IndexedDBDatabase implements Database {
     if (!match) return [];
     
     const tableName = match[1];
+    const actualStoreName = this.getActualStoreName(tableName);
     if (!this.db) return [];
     
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([tableName], 'readonly');
-      const store = transaction.objectStore(tableName);
+      const transaction = this.db!.transaction([actualStoreName], 'readonly');
+      const store = transaction.objectStore(actualStoreName);
       const request = store.getAll();
       
       request.onerror = () => reject(request.error);
@@ -131,8 +146,9 @@ class IndexedDBDatabase implements Database {
     }
     
     const tableName = match[1];
-    const transaction = this.db.transaction([tableName], 'readwrite');
-    const store = transaction.objectStore(tableName);
+    const actualStoreName = this.getActualStoreName(tableName);
+    const transaction = this.db.transaction([actualStoreName], 'readwrite');
+    const store = transaction.objectStore(actualStoreName);
     
     // 解析列名和值
     const columnsMatch = query.match(/INSERT\s+INTO\s+\w+\s*\(([^)]+)\)/i);
@@ -173,8 +189,9 @@ class IndexedDBDatabase implements Database {
     }
     
     const tableName = match[1];
-    const transaction = this.db.transaction([tableName], 'readwrite');
-    const store = transaction.objectStore(tableName);
+    const actualStoreName = this.getActualStoreName(tableName);
+    const transaction = this.db.transaction([actualStoreName], 'readwrite');
+    const store = transaction.objectStore(actualStoreName);
     
     // 解析 SET 子句
     const setMatch = query.match(/SET\s+(.+?)\s+WHERE/i);
@@ -234,8 +251,9 @@ class IndexedDBDatabase implements Database {
     }
     
     const tableName = match[1];
-    const transaction = this.db.transaction([tableName], 'readwrite');
-    const store = transaction.objectStore(tableName);
+    const actualStoreName = this.getActualStoreName(tableName);
+    const transaction = this.db.transaction([actualStoreName], 'readwrite');
+    const store = transaction.objectStore(actualStoreName);
     
     // 解析 WHERE 条件
     const whereMatch = query.match(/WHERE\s+(\w+)\s*=\s*\$1/i);

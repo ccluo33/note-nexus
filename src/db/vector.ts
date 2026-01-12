@@ -1,4 +1,4 @@
-import { db } from './index';
+import { invoke } from '@/lib/browser-adapter/core';
 
 // 向量数据库表结构定义
 export interface VectorDocument {
@@ -10,55 +10,46 @@ export interface VectorDocument {
   updated_at: number; // 时间戳
 }
 
-// 初始化向量数据库表
+// 初始化向量数据库表（保持兼容，实际初始化在后端完成）
 export async function initVectorDb() {
-  await db.execute(`
-    create table if not exists vector_documents (
-      id integer primary key autoincrement,
-      filename text not null,
-      chunk_id integer not null,
-      content text not null,
-      embedding text not null,
-      updated_at integer not null,
-      unique(filename, chunk_id)
-    )
-  `);
-  
-  // 创建用于快速查找文件的索引
-  await db.execute(`
-    create index if not exists idx_vector_documents_filename 
-    on vector_documents(filename)
-  `);
+  // 不需要在前端初始化，因为向量存储现在在后端
+  console.log('向量数据库初始化已移至后端ChromaDB');
 }
 
 // 插入或更新向量文档
 export async function upsertVectorDocument(doc: Omit<VectorDocument, 'id'>) {
-  await db.execute(
-    "insert into vector_documents (filename, chunk_id, content, embedding, updated_at) values ($1, $2, $3, $4, $5) on conflict(filename, chunk_id) do update set content = excluded.content, embedding = excluded.embedding, updated_at = excluded.updated_at",
-    [doc.filename, doc.chunk_id, doc.content, doc.embedding, doc.updated_at]);
+  // 将向量从JSON字符串转换为数组
+  const embeddingArray = JSON.parse(doc.embedding) as number[];
+  
+  // 调用后端API上传向量
+  await invoke<any>('vector_upload', {
+    filename: doc.filename,
+    chunk_id: doc.chunk_id,
+    content: doc.content,
+    embedding: embeddingArray
+  });
 }
 
-// 获取指定文件名的所有向量文档
+// 获取指定文件名的所有向量文档（保持兼容，当前未使用）
 export async function getVectorDocumentsByFilename(filename: string) {
-  return await db.select<VectorDocument>(
-    "select * from vector_documents where filename = $1 order by chunk_id",
-    [filename]);
+  // 目前前端不需要直接获取向量文档，此函数保持兼容
+  return [];
 }
 
 // 通过文件名删除向量文档
 export async function deleteVectorDocumentsByFilename(filename: string) {
-  await db.execute(
-    "delete from vector_documents where filename = $1",
-    [filename]);
+  await invoke<any>('vector_delete', {
+    filename: filename
+  });
 }
 
 // 检查文件是否已存在于向量数据库中
 export async function checkVectorDocumentExists(filename: string) {
-  const result = await db.select<{ count: number }>(
-    "select count(*) as count from vector_documents where filename = $1",
-    [filename]);
+  const result = await invoke<any>('vector_exists', {
+    filename: filename
+  });
   
-  return result[0]?.count > 0;
+  return result?.status === 'success' && result?.data?.exists === true;
 }
 
 // 获取最相似的文档片段
@@ -67,33 +58,26 @@ export async function getSimilarDocuments(
   limit: number = 5,
   threshold: number = 0.7
 ): Promise<{id: number, filename: string, content: string, similarity: number}[]> {
-  // 获取所有文档向量
-  const docs = await db.select<VectorDocument>(`
-    select id, filename, content, embedding from vector_documents
-  `);
+  const result = await invoke<any>('vector_similar', {
+    query_embedding: queryEmbedding,
+    limit: limit,
+    similarity_threshold: threshold
+  });
   
-  if (!docs.length) return [];
-  
-  // 计算余弦相似度并排序
-  const results = docs.map(doc => {
-    const docEmbedding = JSON.parse(doc.embedding) as number[];
-    const similarity = cosineSimilarity(queryEmbedding, docEmbedding);
-    
-    return {
-      id: doc.id,
+  if (result?.status === 'success' && result?.data) {
+    // 将后端返回的结果转换为前端期望的格式
+    return result.data.map((doc: any) => ({
+      id: parseInt(doc.id.split('_')[1]) || 0,  // 从doc_id中提取chunk_id作为id
       filename: doc.filename,
       content: doc.content,
-      similarity
-    };
-  })
-  .filter(doc => doc.similarity >= threshold)
-  .sort((a, b) => b.similarity - a.similarity)
-  .slice(0, limit);
+      similarity: doc.similarity
+    }));
+  }
   
-  return results;
+  return [];
 }
 
-// 余弦相似度计算
+// 余弦相似度计算（保持兼容，可能仍有其他地方使用）
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length) {
     throw new Error('向量维度不匹配');
@@ -114,16 +98,14 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// 清空向量数据库
+// 清空向量数据库（保持兼容，实际实现在后端）
 export async function clearVectorDb() {
-  await db.execute(`
-    delete from vector_documents
-  `);
+  // 目前前端不需要直接清空向量数据库，此函数保持兼容
+  console.log('清空向量数据库功能已移至后端ChromaDB');
 }
 
-// 获取所有向量文档的文件名列表
+// 获取所有向量文档的文件名列表（保持兼容，当前未使用）
 export async function getAllVectorDocumentFilenames() {
-  return await db.select<{filename: string}>(`
-    select distinct filename from vector_documents
-  `);
+  // 目前前端不需要直接获取文件名列表，此函数保持兼容
+  return [];
 }
