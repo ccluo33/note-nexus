@@ -1,6 +1,5 @@
 'use client'
 import { useTranslations } from 'next-intl';
-import { useTheme } from 'next-themes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gem, Move3D, Eye, MessageSquare } from "lucide-react";
@@ -8,11 +7,7 @@ import { Gem, Move3D, Eye, MessageSquare } from "lucide-react";
 
 export default function DefaultModelsSection() {
   const t = useTranslations('settings.ai.defaultModels');
-  const { theme, systemTheme } = useTheme();
-  
-  // 确定当前主题
-  const currentTheme = theme === 'system' ? systemTheme : theme;
-  const isDark = currentTheme === 'dark';
+  // const { theme, systemTheme } = useTheme();
 
   const models = [
     {

@@ -1,33 +1,8 @@
 import emitter from '@/lib/emitter';
-import {getCurrentWebviewWindow} from '@tauri-apps/api/webviewWindow';
 
 export default function initShowWindow() {
+    // 浏览器环境中不需要处理窗口显示，忽略此事件
     emitter.on('openWindow', async () => {
-        const window = getCurrentWebviewWindow()
-        if (!window) return
-        if (!(await window.isVisible())) {
-            await window.show()
-            await window.setFocus()
-            await window.setAlwaysOnTop(true)
-            await window.setAlwaysOnTop(false)
-        } else if (await window.isMinimized()) {
-            await window.unminimize()
-            setTimeout(async () => {
-                await window.show()
-                await window.setFocus()
-                await window.setAlwaysOnTop(true)
-                await window.setAlwaysOnTop(false)
-            }, 100)
-        } else {
-            // 增加判断窗口是否在最前面
-            const isFocused = await window.isFocused();
-            if (!isFocused) {
-                await window.setFocus();
-                await window.setAlwaysOnTop(true);
-                await window.setAlwaysOnTop(false);
-            } else {
-                await window.hide()
-            }
-        }
-    })
+        console.log('openWindow event received in browser environment');
+    });
 }

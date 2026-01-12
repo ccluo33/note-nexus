@@ -85,12 +85,17 @@ export function MdEditor() {
         resetSelectedText()
       },
       link: {
-        isOpen: false,
+        isOpen: true,
+        jumpBlank: true,
         click: (dom: Element) => {
           const href = dom.getAttribute('href') || dom.innerHTML
           if (!href) return
           open(href)
         }
+      },
+      table: {
+        maxRow: 20,
+        maxCol: 10,
       },
       preview: {
         hljs: {
@@ -149,15 +154,37 @@ export function MdEditor() {
       upload: {
         async handler(files: File[]) {
           const store = await Store.load('store.json');
-          const useImageRepo = await store.get('useImageRepo')
+          // 默认启用图床功能，除非明确设置为false
+          const useImageRepo = await store.get<boolean>('useImageRepo') !== false
+          console.log('Image upload handler - useImageRepo:', useImageRepo)
           if (useImageRepo) {
+            const mainImageHosting = await store.get<string>('mainImageHosting') || 'fastdfs'
+            console.log('Image upload handler - mainImageHosting:', mainImageHosting)
+            
+            // 如果没有配置图床，给出明确提示
+            if (!mainImageHosting || mainImageHosting === 'none') {
+              toast({
+                title: '上传失败',
+                description: '请先在设置中配置图床',
+                variant: 'destructive',
+              })
+              return ''
+            }
+            
             const filesUrls = await uploadImages(files)
             if (vditor && typeof vditor.insertValue === 'function') {
               for (let i = 0; i < filesUrls.length; i++) {
-                vditor.insertValue(`![${files[i].name}](${filesUrls[i]})`)
+                if (filesUrls[i]) {
+                  vditor.insertValue(`![${files[i].name}](${filesUrls[i]})`)
+                }
               }
             }
-            return filesUrls.join('\n')
+            if (filesUrls.length > 0) {
+              return filesUrls.join('\n')
+            } else {
+              // 如果没有图片上传成功，返回空字符串，不抛出错误
+              return ''
+            }
           } else {
             // 保存到 activeFilePath/image 目录下
             const workspace = await getWorkspacePath()
@@ -177,7 +204,7 @@ export function MdEditor() {
               const path = `${imagesDir}/${fileName}`
               await writeFile(path, uint8Array)
               if (typeof vditor.insertValue === 'function') {
-                vditor.insertValue(`![${files[i].name}](/${assetsPath}/${fileName})`)
+                vditor.insertValue(`![${files[i].name}](/assets/${fileName})`)
               }
             }
             return '图片已保存到本地'
@@ -276,17 +303,34 @@ export function MdEditor() {
         return new Promise<string | undefined>(async(resolve, reject) => {
           if (!file.type.includes('image')) return resolve(undefined)
           const toastNotification = toast({
-            title: t('upload.uploading'),
+            title: '上传中',
             description: file.name,
             duration: 600000,
           })
-          await uploadImage(file).then(async url => {
-            resolve(url)
-          }).catch(err => {
-            reject(err)
-          }).finally(() => {
+          try {
+            const url = await uploadImage(file)
+            if (url) {
+              resolve(url)
+            } else {
+              console.error(`Failed to upload image ${file.name}: no URL returned`)
+              toast({
+                title: '上传失败',
+                description: `${file.name}: 未返回图片URL`,
+                variant: 'destructive',
+              })
+              resolve(undefined)
+            }
+          } catch (err) {
+            console.error(`Failed to upload image ${file.name}:`, err)
+            toast({
+              title: '上传失败',
+              description: `${file.name}: ${err instanceof Error ? err.message : '未知错误'}`,
+              variant: 'destructive',
+            })
+            resolve(undefined)
+          } finally {
             toastNotification.dismiss()
-          })
+          }
         });
       })
     );

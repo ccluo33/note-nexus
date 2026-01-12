@@ -1,5 +1,5 @@
 import { createWorker } from 'tesseract.js';
-import { readFile, BaseDirectory } from "@/lib/browser-adapter/fs";
+import { readFile } from "@/lib/browser-adapter/fs";
 import { Store } from "@/lib/browser-adapter/store";
 
 export default async function ocr(path: string): Promise<string> {
@@ -13,8 +13,10 @@ export default async function ocr(path: string): Promise<string> {
     })
 
     const workerPromise = (async () => {
-      const image = await readFile(path, { baseDir: BaseDirectory.AppData });
-      const blob = new Blob([image.buffer as ArrayBuffer])
+      // 读取图片文件
+      const image = await readFile(path);
+      // 将ArrayBuffer转换为Uint8Array后创建Blob
+      const blob = new Blob([new Uint8Array(image)], { type: 'image/*' })
       const worker = await createWorker(langArr)
       const ret = (await worker.recognize(blob)).data.text;
       await worker.terminate();
@@ -23,6 +25,7 @@ export default async function ocr(path: string): Promise<string> {
 
     return await Promise.race([workerPromise, timeoutPromise])
   } catch (error) {
-    return error as string
+    console.error('OCR error:', error);
+    return 'OCR 识别失败: ' + (error instanceof Error ? error.message : String(error))
   }
 }

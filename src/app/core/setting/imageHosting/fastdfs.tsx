@@ -39,27 +39,27 @@ export function FastDFSImageHosting() {
       const savedConfig = await store.get<FastDFSConfig>('fastDFSConfig');
       if (savedConfig) {
         setConfig(savedConfig);
-        // 如果配置完整，自动进行连接检测
-        if (savedConfig.trackerServer && savedConfig.httpUrl) {
-          setFastDFSState(SyncStateEnum.checking);
-          try {
-            const isConnected = await testFastDFSConnection(savedConfig);
-            if (isConnected) {
-              setFastDFSState(SyncStateEnum.success);
-            } else {
-              setFastDFSState(SyncStateEnum.fail);
-            }
-          } catch (error) {
-            setFastDFSState(SyncStateEnum.fail);
-            console.error('FastDFS connection test failed:', error);
+        // 仅验证配置格式，不进行网络测试
+        try {
+          // 更安全的 URL 验证，添加必要的检查
+          if (savedConfig.httpUrl && savedConfig.httpUrl.trim()) {
+            new URL(savedConfig.httpUrl);
           }
+          if (savedConfig.trackerServer && savedConfig.trackerServer.trim() && savedConfig.port) {
+            new URL(`http://${savedConfig.trackerServer}:${savedConfig.port}`);
+          }
+          // 配置格式正确，设置为成功状态
+          setFastDFSState(SyncStateEnum.success);
+        } catch (urlError) {
+          console.error('FastDFS 配置格式错误:', urlError);
+          setFastDFSState(SyncStateEnum.fail);
         }
       }
     };
     initConfig();
-  }, [setFastDFSConfig]);
+  }, [setFastDFSState]);
 
-  // 自动保存和测试配置
+  // 保存配置但不自动测试连接
   const handleConfigChange = async (newConfig: FastDFSConfig) => {
     setConfig(newConfig);
     
@@ -70,23 +70,61 @@ export function FastDFSImageHosting() {
       console.error('Failed to save FastDFS config:', error);
     }
     
-    // 如果必填字段都已填写，自动测试连接
-    if (newConfig.trackerServer && newConfig.httpUrl) {
-      setFastDFSState(SyncStateEnum.checking);
-
-      try {
-        const isConnected = await testFastDFSConnection(newConfig);
-        if (isConnected) {
-          setFastDFSState(SyncStateEnum.success);
-        } else {
-          setFastDFSState(SyncStateEnum.fail);
-        }
-      } catch (error) {
-        setFastDFSState(SyncStateEnum.fail);
-        console.error('FastDFS connection test failed:', error);
+    // 仅验证配置格式，不进行网络测试
+    try {
+      // 更安全的 URL 验证，添加必要的检查
+      if (newConfig.httpUrl && newConfig.httpUrl.trim()) {
+        new URL(newConfig.httpUrl);
       }
-    } else {
+      if (newConfig.trackerServer && newConfig.trackerServer.trim() && newConfig.port) {
+        new URL(`http://${newConfig.trackerServer}:${newConfig.port}`);
+      }
+      // 配置格式正确，设置为成功状态
+      setFastDFSState(SyncStateEnum.success);
+    } catch (urlError) {
+      console.error('FastDFS 配置格式错误:', urlError);
       setFastDFSState(SyncStateEnum.fail);
+    }
+  };
+
+  // 手动测试连接
+  const handleTestConnection = async () => {
+    if (!config.trackerServer || !config.httpUrl) {
+      toast({
+        title: '配置不完整',
+        description: '请先填写完整的 FastDFS 配置',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setFastDFSState(SyncStateEnum.checking);
+
+    try {
+      const isConnected = await testFastDFSConnection(config);
+      if (isConnected) {
+        setFastDFSState(SyncStateEnum.success);
+        toast({
+          title: '连接成功',
+          description: 'FastDFS 服务器连接测试通过',
+          variant: 'success',
+        });
+      } else {
+        setFastDFSState(SyncStateEnum.fail);
+        toast({
+          title: '连接失败',
+          description: 'FastDFS 服务器连接测试失败，请检查配置和网络',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      setFastDFSState(SyncStateEnum.fail);
+      console.error('FastDFS connection test failed:', error);
+      toast({
+        title: '连接错误',
+        description: 'FastDFS 服务器连接测试时发生错误',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -155,13 +193,18 @@ export function FastDFSImageHosting() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* 状态显示 */}
+        {/* 状态显示和测试按钮 */}
         <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-          <span className="text-sm font-medium">连接状态</span>
           <div className="flex items-center gap-2">
             {getStatusIcon()}
             <span className="text-sm">{getStatusText()}</span>
           </div>
+          <Button 
+            onClick={handleTestConnection}
+            size="sm"
+          >
+            测试连接
+          </Button>
         </div>
 
         {/* 基本配置 */}

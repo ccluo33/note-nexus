@@ -42,7 +42,7 @@ function Tree({ item }: { item: DirTree }) {
 
 export function FileManager() {
   const [isDragging, setIsDragging] = useState(false)
-  const { activeFilePath, fileTree, loadFileTree, setActiveFilePath, addFile } = useArticleStore()
+  const { activeFilePath, fileTree, loadFileTree, setActiveFilePath, addFile, setSelectedFolder } = useArticleStore()
 
   async function handleDrop (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
@@ -129,8 +129,19 @@ export function FileManager() {
     }
   }, [loadFileTree])
 
+  // 处理空白区域点击，取消文件夹选择
+  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // 检查点击的是否是空白区域，而不是文件或文件夹项
+    if (e.target instanceof HTMLDivElement && e.target.className.includes('overflow-y-auto')) {
+      setSelectedFolder(null)
+    }
+  }
+
   return (
-    <div className={`flex-1 overflow-y-auto ${isDragging && 'outline-2 outline-black outline-dotted -outline-offset-4'}`}>
+    <div 
+      className={`flex-1 overflow-y-auto ${isDragging && 'outline-2 outline-black outline-dotted -outline-offset-4'}`}
+      onClick={handleContainerClick}
+    >
       <div className="flex-1 p-0">
         <div className="flex-1">
           <ul className="h-full">

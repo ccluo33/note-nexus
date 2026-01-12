@@ -15,7 +15,6 @@ import useArticleStore from '@/stores/article'
 import React from 'react'
 import { ControlText } from '@/app/core/record/mark/control-text'
 import { ControlRecording } from '@/app/core/record/mark/control-recording'
-import { ControlScan } from '@/app/core/record/mark/control-scan'
 import { ControlImage } from '@/app/core/record/mark/control-image'
 import { ControlLink } from '@/app/core/record/mark/control-link'
 import { ControlFile } from '@/app/core/record/mark/control-file'
@@ -69,8 +68,6 @@ export function TitleBar({ onSearchClick }: TitleBarProps) {
                       return <ControlText key={item.id} />
                     case 'recording':
                       return <ControlRecording key={item.id} />
-                    case 'scan':
-                      return <ControlScan key={item.id} />
                     case 'image':
                       return <ControlImage key={item.id} />
                     case 'link':

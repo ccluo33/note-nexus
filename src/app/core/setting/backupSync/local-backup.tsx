@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '@/lib/browser-adapter/core';
 import { save, open } from "@/lib/browser-adapter/dialog";
 import { useToast } from "@/hooks/use-toast";
 import dayjs from 'dayjs';

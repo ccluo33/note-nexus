@@ -2,7 +2,6 @@ import {
   BotMessageSquare,
   LayoutTemplate,
   ScanText,
-  Store,
   UserRoundCog,
   Drama,
   FolderOpen,
@@ -12,7 +11,6 @@ import {
   ImageUp,
   FileCog,
   Book,
-  KeyboardIcon,
   Volume2,
   Settings,
   Puzzle

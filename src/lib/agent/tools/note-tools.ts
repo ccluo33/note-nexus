@@ -2,7 +2,8 @@ import { Tool, ToolResult } from '../types'
 import { readTextFile, writeTextFile, remove } from "@/lib/browser-adapter/fs"
 import { getAllMarkdownFiles } from '@/lib/files'
 import { getFilePathOptions, getWorkspacePath } from '@/lib/workspace'
-import { join } from '@tauri-apps/api/path'
+// 使用浏览器环境的路径处理
+const join = (...parts: string[]) => parts.join('/')
 import useArticleStore from '@/stores/article'
 
 export const listMarkdownFilesTool: Tool = {

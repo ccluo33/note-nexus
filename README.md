@@ -5,7 +5,6 @@
 [![](https://gitcode.com/codexu/note-gen/star/badge.svg)](https://gitcode.com/codexu/note-gen)
 ![](https://github.com/codexu/note-gen/actions/workflows/release.yml/badge.svg?branch=release)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8f7518c3-b627-4277-bc2f-e477960f5dc4/deploy-status)](https://app.netlify.com/projects/note-gen-docs/deploys)
-![](https://img.shields.io/github/downloads/codexu/note-gen/total)
 ![](https://img.shields.io/github/issues-closed/codexu/note-gen)
 
 <div>
@@ -20,28 +19,67 @@
 
 💬 Join [WeChat/QQ Group](https://github.com/codexu/note-gen/discussions/110), [Discord](https://discord.gg/SXyVZGpbpk), [Telegram](https://t.me/notegen)
 
-NoteGen is a cross-platform `Markdown` note-taking application dedicated to using AI to bridge recording and writing, organizing fragmented knowledge into a readable note.
+NoteGen is a web-based `Markdown` note-taking application dedicated to using AI to bridge recording and writing, organizing fragmented knowledge into a readable note.
 
 ![](https://s2.loli.net/2025/12/22/jlpEP2c6ogwHhIA.png)
 
 ## Features
 
-- 🚀 Lightweight (25MB), free, no ads.
-- 🌐 Cross-platform support.
+- 🚀 Lightweight, free, no ads.
+- 🌐 Web-based application, accessible from any browser.
 - 🆓 Free AI and sync solutions.
 - 📦 Out-of-the-box RAG support.
 - 🔌 MCP support for AI tool integration.
 - ✍️ Quick note-taking for fragmented information.
 - 📝 Native Markdown storage format.
+- 🐍 Python backend with FastAPI framework.
 
-## Download
+## Technology Stack
 
-| ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white&style=for-the-badge) | ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white&style=for-the-badge) | ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black&style=for-the-badge) | ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white&style=for-the-badge) | ![iOS](https://img.shields.io/badge/iOS-000000?logo=apple&logoColor=white&style=for-the-badge) |
-| --- | --- | --- | --- | --- |
-| ✅ beta | ✅ beta | ✅ beta | 🛠️ alpha | 🛠️ alpha |
-| [Download](https://notegen.top/en/docs/download#desktop-beta) | [Download](https://notegen.top/en/docs/download#desktop-beta) | [Download](https://notegen.top/en/docs/download#desktop-beta) | [Download](https://notegen.top/en/docs/download#android) | [TestFlight](https://testflight.apple.com/join/8KjFRTCq) |
+- **Frontend**: Next.js, React, TypeScript
+- **Backend**: Python, FastAPI
+- **Database**: SQLite (default), PostgreSQL (optional)
+- **API**: RESTful API with Swagger documentation
 
-> [UpgradeLink offers application upgrade and download services](http://upgrade.toolsetlink.com/upgrade/example/tauri-example.html)
+## Installation and Running
+
+### Prerequisites
+
+- Node.js 18+ and npm/yarn/pnpm
+- Python 3.8+
+
+### Frontend Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Open [http://localhost:3456](http://localhost:3456) in your browser.
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Run the backend server:
+   ```bash
+   python -m uvicorn main:app --reload --port 8000
+   ```
+
+4. API documentation will be available at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ## From Recording to Writing
 

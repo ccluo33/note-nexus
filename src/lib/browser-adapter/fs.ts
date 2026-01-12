@@ -74,11 +74,12 @@ class IndexedDBFileSystem {
   }
 
   private normalizePath(path: string, baseDir?: BaseDirectory): string {
-    // 移除 baseDir 前缀，统一使用相对路径
+    // 对于带 baseDir 的路径，不要添加 '/' 前缀，直接使用相对路径
     if (baseDir) {
-      // 对于网页版，我们使用虚拟路径
-      return path.startsWith('/') ? path : `/${path}`;
+      // 移除可能存在的 '/' 前缀，因为 baseDir 已经提供了上下文
+      return path.startsWith('/') ? path.substring(1) : path;
     }
+    // 对于不带 baseDir 的路径，使用绝对路径格式
     return path.startsWith('/') ? path : `/${path}`;
   }
 
@@ -100,7 +101,15 @@ class IndexedDBFileSystem {
       request.onsuccess = () => {
         const result = request.result;
         if (result && result.content) {
-          resolve(result.content);
+          if (result.isBinary) {
+            // 处理二进制数据，转换为字符串
+            const binaryContent = result.content as ArrayBuffer;
+            const text = new TextDecoder().decode(binaryContent);
+            resolve(text);
+          } else {
+            // 直接返回文本数据
+            resolve(result.content as string);
+          }
         } else {
           reject(new Error(`File not found: ${normalizedPath}`));
         }
@@ -126,8 +135,15 @@ class IndexedDBFileSystem {
       request.onsuccess = () => {
         const result = request.result;
         if (result && result.content) {
-          const encoder = new TextEncoder();
-          resolve(encoder.encode(result.content));
+          if (result.isBinary) {
+            // 处理二进制数据
+            const binaryContent = result.content as ArrayBuffer;
+            resolve(new Uint8Array(binaryContent));
+          } else {
+            // 处理文本数据
+            const encoder = new TextEncoder();
+            resolve(encoder.encode(result.content as string));
+          }
         } else {
           reject(new Error(`File not found: ${normalizedPath}`));
         }
@@ -155,6 +171,7 @@ class IndexedDBFileSystem {
         const request = store.put({
           path: normalizedPath,
           content: contents,
+          isBinary: false,
           isDirectory: options?.isDirectory || false,
           createdAt: existing?.createdAt || now,
           updatedAt: now,
@@ -171,8 +188,6 @@ class IndexedDBFileSystem {
   async writeFile(path: string, contents: Uint8Array, options?: { baseDir?: BaseDirectory; isDirectory?: boolean }): Promise<void> {
     await this.ensureInit();
     const normalizedPath = this.normalizePath(path, options?.baseDir);
-    const decoder = new TextDecoder();
-    const textContent = decoder.decode(contents);
 
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -189,7 +204,8 @@ class IndexedDBFileSystem {
         const now = Date.now();
         const request = store.put({
           path: normalizedPath,
-          content: textContent,
+          content: contents.buffer, // 直接保存ArrayBuffer
+          isBinary: true,
           isDirectory: options?.isDirectory || false,
           createdAt: existing?.createdAt || now,
           updatedAt: now,
@@ -327,8 +343,8 @@ class IndexedDBFileSystem {
   }
 
   async copyFile(source: string, destination: string, options?: { baseDir?: BaseDirectory }): Promise<void> {
-    const content = await this.readTextFile(source, options);
-    await this.writeTextFile(destination, content, options);
+    const content = await this.readFile(source, options);
+    await this.writeFile(destination, content, options);
   }
 
   async remove(path: string, options?: { baseDir?: BaseDirectory; recursive?: boolean }): Promise<void> {

@@ -96,9 +96,10 @@ export const createToolbarConfig = (t: any, editorWidth?: number) => {
   
   // 计算累计宽度阈值（包含分割线）
   const baseWidth = group1Width + DIVIDER_WIDTH + group2PCWidth // 72 + 19 + 72 = 163
-  const withLastWidth = baseWidth + DIVIDER_WIDTH + groupLastWidth // 163 + 19 + 108 = 290
-  const withGroup3Width = baseWidth + DIVIDER_WIDTH + group3Width + DIVIDER_WIDTH + groupLastWidth // 163 + 19 + 144 + 19 + 108 = 453
-  const withGroup4Width = baseWidth + DIVIDER_WIDTH + group3Width + DIVIDER_WIDTH + group4Width + DIVIDER_WIDTH + groupLastWidth // 163 + 19 + 144 + 19 + 360 + 19 + 108 = 832
+  const withLinkTableUploadWidth = baseWidth + DIVIDER_WIDTH + 3 * BUTTON_WIDTH // 163 + 19 + 108 = 290 (link, table, upload)
+  const withLastWidth = withLinkTableUploadWidth + DIVIDER_WIDTH + groupLastWidth // 290 + 19 + 108 = 417
+  const withGroup3Width = withLinkTableUploadWidth + DIVIDER_WIDTH + group3Width + DIVIDER_WIDTH + groupLastWidth // 290 + 19 + 144 + 19 + 108 = 580
+  const withGroup4Width = withLinkTableUploadWidth + DIVIDER_WIDTH + group3Width + DIVIDER_WIDTH + group4Width + DIVIDER_WIDTH + groupLastWidth // 290 + 19 + 144 + 19 + 360 + 19 + 108 = 959
   
   let config: any[] = []
   
@@ -109,20 +110,27 @@ export const createToolbarConfig = (t: any, editorWidth?: number) => {
     config = [...group1, '|', ...group2PC]
     
     // 根据宽度逐步添加更多组
+    if (editorWidth >= withLinkTableUploadWidth) {
+      // 添加常用的 link、table、upload 按钮
+      config.push('|', { name: 'link', tipPosition: 's' }, { name: 'table', tipPosition: 's' }, { name: 'upload', tipPosition: 's' })
+    }
+    
     if (editorWidth >= withLastWidth) {
       config.push('|', ...groupLast)
     }
     
     if (editorWidth >= withGroup3Width) {
-      // 在最后一组之前插入 group3
+      // 在 link/table/upload 组和最后一组之间插入 group3
       const lastGroupIndex = config.length - groupLast.length - 1
       config.splice(lastGroupIndex, 0, '|', ...group3)
     }
     
     if (editorWidth >= withGroup4Width) {
-      // 在最后一组之前插入 group4
+      // 在 group3 和最后一组之间插入剩余的 group4 按钮
       const lastGroupIndex = config.length - groupLast.length - 1
-      config.splice(lastGroupIndex, 0, '|', ...group4)
+      // 从 group4 中移除已经显示的 link、table、upload 按钮
+      const remainingGroup4 = group4.filter(btn => !['link', 'table', 'upload'].includes(btn.name))
+      config.splice(lastGroupIndex, 0, '|', ...remainingGroup4)
     }
     
     // 如果宽度不足以显示最后一组，也要保证它显示

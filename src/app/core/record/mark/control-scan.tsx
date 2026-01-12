@@ -1,9 +1,7 @@
 'use client'
 import { TooltipButton } from "@/components/tooltip-button"
 import { useTranslations } from 'next-intl'
-import { invoke } from "@tauri-apps/api/core"
 import { ScanText } from "lucide-react"
-import { convertFileSrc } from "@tauri-apps/api/core"
 import {
   Dialog,
   DialogContent,
@@ -36,7 +34,7 @@ export function ControlScan() {
   const t = useTranslations();
   const [open, setOpen] = useState(false)
   const [image, setImage] = useState<HTMLImageElement>();
-  const [files, setFiles] = useState<ScreenshotImage[]>([])
+  const [files] = useState<ScreenshotImage[]>([])
   const cropperRef = useRef<Cropper | null>(null);
   const { currentTagId, fetchTags, getCurrentTag } = useTagStore()
   const { fetchMarks, addQueue, removeQueue, setQueue } = useMarkStore()
@@ -62,19 +60,9 @@ export function ControlScan() {
   }
 
   async function createScreenShot() {
-    const fileNames = await invoke<ScreenshotImage[]>('screenshot')
-    const convertedFiles = fileNames.map((fileName: ScreenshotImage) => {
-      return {
-        ...fileName,
-        path: convertFileSrc(fileName.path),
-      }
-    })
-    setFiles(convertedFiles)
-    if (convertedFiles.length > 0) {
-      const image = new window.Image();
-      image.src = convertedFiles[0].path;
-      setImage(image)
-    }
+    // 浏览器环境不支持Tauri的截图功能
+    console.warn('Screenshot function is not supported in browser mode');
+    return;
   }
 
   function selectImage(file: ScreenshotImage) {

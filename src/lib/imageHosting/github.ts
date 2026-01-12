@@ -1,5 +1,4 @@
 import { Store } from "@/lib/browser-adapter/store";
-import { fetch, Proxy } from '@tauri-apps/plugin-http'
 import { GithubError, GithubRepoInfo } from "../sync/github.types";
 import { toast } from '@/hooks/use-toast';
 import { v4 as uuid } from 'uuid';
@@ -11,12 +10,6 @@ export async function createImageRepo(name: string, isPrivate?: boolean) {
   const store = await Store.load('store.json');
   const accessToken = await store.get('githubImageAccessToken')
   if (!accessToken) return;
-  
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
   
   try {
     // 设置请求头
@@ -33,8 +26,7 @@ export async function createImageRepo(name: string, isPrivate?: boolean) {
         name,
         description: 'This is a NoteGen sync repository.',
         private: isPrivate
-      }),
-      proxy
+      })
     };
     
     const url = 'https://api.github.com/user/repos';
@@ -57,12 +49,6 @@ export async function checkImageRepoState(name: string) {
   const accessToken = await store.get('githubImageAccessToken')
   if (!accessToken) return;
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   // 设置请求头
   const headers = new Headers();
   headers.append('Authorization', `Bearer ${accessToken}`);
@@ -71,8 +57,7 @@ export async function checkImageRepoState(name: string) {
   
   const requestOptions = {
     method: 'GET',
-    headers,
-    proxy
+    headers
   };
   
   const url = `https://api.github.com/repos/${githubUsername}/${name}`;
@@ -92,12 +77,6 @@ export async function uploadImageByGithub(file: File) {
   const username = await store.get('githubImageUsername')
   const id = uuid()
 
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     const ext = file.type.split('/')[1]
     const filename = `${id}.${ext}`.replace(/\s/g, '_')
@@ -121,8 +100,7 @@ export async function uploadImageByGithub(file: File) {
         message: `Upload ${filename}`,
         content,
         sha: '',
-      }),
-      proxy
+      })
     };
     
     const url = `https://api.github.com/repos/${username}/${repoName}/contents/${filename}`;
@@ -166,12 +144,6 @@ export async function getImageFiles({ path }: { path: string }) {
   // 获取实际使用的仓库名（自定义或默认）
   const repoName = await getImageRepoName()
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     // 设置请求头
     const headers = new Headers();
@@ -182,8 +154,7 @@ export async function getImageFiles({ path }: { path: string }) {
     
     const requestOptions = {
       method: 'GET',
-      headers,
-      proxy
+      headers
     };
     
     const url = `https://api.github.com/repos/${githubImageUsername}/${repoName}/contents/${path}`;

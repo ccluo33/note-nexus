@@ -6,13 +6,39 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export async function convertImage(path: string) {
-  // 网页版直接返回路径，由浏览器适配器处理
-  return path
+  // 如果是http/https链接，直接返回
+  if (path.includes('http')) {
+    return path
+  }
+  
+  try {
+    // 从IndexedDB读取图片内容
+    const { readFile } = await import('./browser-adapter/fs')
+    const fileData = await readFile(path)
+    
+    // 检查文件数据是否有效
+    if (!fileData || fileData.length === 0) {
+      throw new Error('Empty image data')
+    }
+    
+    // 将ArrayBufferLike转换为ArrayBuffer，然后创建Blob
+    const arrayBuffer = fileData.buffer as ArrayBuffer;
+    const blob = new Blob([new Uint8Array(arrayBuffer)], { type: 'image/*' })
+    
+    // 创建可访问的URL
+    const url = URL.createObjectURL(blob)
+    
+    return url
+  } catch (error) {
+    console.error('Failed to convert image:', error)
+    // 如果读取失败，返回原始路径
+    return path
+  }
 }
 
 export async function convertImageByWorkspace(path: string) {
-  // 网页版直接返回路径，由浏览器适配器处理
-  return path
+  // 复用convertImage函数的逻辑，确保图片能正确加载
+  return convertImage(path)
 }
 
 export function convertBytesToSize(bytes: number) {

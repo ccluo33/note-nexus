@@ -1,6 +1,5 @@
 import { Store } from "@/lib/browser-adapter/store";
-import { fetch, Proxy } from '@tauri-apps/plugin-http'
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';   
 import { v4 as uuid } from 'uuid';
 
 interface S3Config {
@@ -150,10 +149,6 @@ async function getSignatureKey(key: string, dateStamp: string, regionName: strin
 // 测试 S3 连接
 export async function testS3Connection(config: S3Config): Promise<boolean> {
   try {
-    const store = await Store.load('store.json');
-    const proxyUrl = await store.get<string>('proxy')
-    const proxy: Proxy | undefined = proxyUrl ? { all: proxyUrl } : undefined
-
     const endpoint = config.endpoint || `https://s3.${config.region}.amazonaws.com`;
     const url = `${endpoint}/${config.bucket}`;
     
@@ -177,8 +172,7 @@ export async function testS3Connection(config: S3Config): Promise<boolean> {
     
     const response = await fetch(url, {
       method: 'HEAD',
-      headers: requestHeaders,
-      proxy
+      headers: requestHeaders
     });
 
     if (response.status !== 200) {
@@ -208,9 +202,6 @@ export async function uploadImageByS3(file: File): Promise<string | undefined> {
       return undefined;
     }
     
-    const proxyUrl = await store.get<string>('proxy')
-    const proxy: Proxy | undefined = proxyUrl ? { all: proxyUrl } : undefined
-
     // 生成文件名
     const id = uuid();
     const ext = file.name.split('.').pop() || 'jpg';
@@ -242,8 +233,7 @@ export async function uploadImageByS3(file: File): Promise<string | undefined> {
     const response = await fetch(url, {
       method: 'PUT',
       headers: requestHeaders,
-      body: uint8Array,
-      proxy
+      body: uint8Array
     });
     
     if (response.status === 200 || response.status === 204) {

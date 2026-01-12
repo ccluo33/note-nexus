@@ -916,7 +916,7 @@ const useSettingStore = create<SettingState>((set, get) => ({
   recordToolbarConfig: [
     { id: 'text', enabled: true, order: 0 },
     { id: 'recording', enabled: true, order: 1 },
-    { id: 'scan', enabled: true, order: 2 },
+    { id: 'scan', enabled: false, order: 2 },
     { id: 'image', enabled: true, order: 3 },
     { id: 'link', enabled: true, order: 4 },
     { id: 'file', enabled: true, order: 5 },

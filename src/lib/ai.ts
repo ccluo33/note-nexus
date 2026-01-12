@@ -2,7 +2,6 @@ import { toast } from "@/hooks/use-toast";
 import { Store } from "@/lib/browser-adapter/store";
 import OpenAI from 'openai';
 import { AiConfig } from "@/app/core/setting/config";
-import { fetch } from "@tauri-apps/plugin-http";
 
 /**
  * 获取当前的prompt内容
@@ -33,7 +32,10 @@ async function getAISettings(modelType?: string): Promise<AiConfig | undefined> 
   const aiConfigs = await store.get<AiConfig[]>('aiModelList')
   const modelId = await store.get(modelType || 'primaryModel')
   
+  console.log(`获取AI设置，modelType: ${modelType || 'primaryModel'}, modelId: ${modelId}`);
+  
   if (!modelId || !aiConfigs) {
+    console.log('AI设置获取失败，缺少modelId或aiConfigs');
     return undefined
   }
 
@@ -872,6 +874,80 @@ export async function fetchAiDesc(text: string) {
   } catch (error) {
     handleAIError(error, false)
     return null
+  }
+}
+
+// 总结网页内容
+export async function summarizeWebContent(content: string, title: string = '') {
+  // 如果内容为空，直接返回空字符串
+  if (!content || content.trim() === '') {
+    console.log('网页内容为空，跳过AI总结');
+    return '';
+  }
+  
+  console.log(`开始AI总结，内容长度: ${content.length}, 标题: ${title}`);
+  
+  try {
+    // 获取AI设置，使用当前配置的对话模型
+    const aiConfig = await getAISettings('primaryModel');
+    
+    // 检查AI配置是否有效
+    if (!aiConfig || !aiConfig.baseURL || !aiConfig.model) {
+      console.warn('AI配置无效，跳过AI总结');
+      return '';
+    }
+    
+    console.log(`使用AI模型: ${aiConfig.model}, baseURL: ${aiConfig.baseURL}`);
+    
+    // 准备适合总结网页内容的提示词
+    let summaryContent = '';
+    if (title) {
+      summaryContent = `请总结以下网页内容。网页标题是：${title}\n\n内容：\n${content}`;
+    } else {
+      summaryContent = `请总结以下网页内容：\n\n内容：\n${content}`;
+    }
+    
+    // 添加总结要求
+    summaryContent += '\n\n请提供内容的简明总结，重点关注主要观点和关键信息。保持总结在200字以内，易于理解且结构清晰。';
+    
+    // 添加语言要求，确保输出为中文
+    summaryContent += '\n\n重要提示：请确保你的回复使用中文，不要使用其他语言。';
+    
+    // 准备消息（包含语言设置）
+    const { messages } = await prepareMessages(summaryContent, true);
+    console.log('准备发送AI请求，消息数量:', messages.length);
+    
+    const openai = await createOpenAIClient(aiConfig);
+    console.log('发送AI请求，模型:', aiConfig.model);
+    
+    // 为AI请求设置超时（10秒）
+    const completion = await Promise.race([
+      openai.chat.completions.create({
+        model: aiConfig.model,
+        messages: messages,
+        temperature: aiConfig.temperature || 0.7,
+        top_p: aiConfig.topP || 1,
+      }),
+      // 超时保护
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('AI总结超时')), 10000);
+      })
+    ]);
+    
+    console.log('AI请求成功，获取到响应');
+    const result = completion.choices[0].message.content || '';
+    console.log('AI总结完成，结果长度:', result.length);
+    return result;
+  } catch (error) {
+    console.error('AI总结过程中出错:', error);
+    // 更详细的错误信息
+    if (error instanceof Error) {
+      console.error('错误名称:', error.name);
+      console.error('错误消息:', error.message);
+      console.error('错误堆栈:', error.stack);
+    }
+    // 失败返回空字符串，不阻塞流程
+    return '';
   }
 }
 

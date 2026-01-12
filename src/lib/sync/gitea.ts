@@ -1,7 +1,6 @@
 import { toast } from '@/hooks/use-toast';
 import { Store } from "@/lib/browser-adapter/store";
 import { v4 as uuid } from 'uuid';
-import { fetch, Proxy } from '@tauri-apps/plugin-http';
 import { fetch as encodeFetch } from './encode-fetch'
 import { 
   GiteaInstanceType, 
@@ -42,11 +41,9 @@ async function getCommonHeaders(): Promise<any> {
   return headers;
 }
 
-// 获取代理配置
-async function getProxyConfig(): Promise<Proxy | undefined> {
-  const store = await Store.load('store.json');
-  const proxyUrl = await store.get<string>('proxy');
-  return proxyUrl ? { all: proxyUrl } : undefined;
+// 获取代理配置 - 浏览器环境不支持直接设置代理
+async function getProxyConfig(): Promise<undefined> {
+  return undefined;
 }
 
 /**
@@ -91,7 +88,6 @@ export async function uploadFile({
 
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
 
     const requestBody: any = {
       branch: 'main',
@@ -115,8 +111,7 @@ export async function uploadFile({
     const response = await fetch(url, {
       method,
       headers,
-      body: JSON.stringify(requestBody),
-      proxy
+      body: JSON.stringify(requestBody)
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -348,7 +343,7 @@ export async function getFileContent({ path, ref, repo }: { path: string; ref: s
       method: 'GET',
       headers,
       proxy
-    });
+    } as any);
 
     if (response.status >= 200 && response.status < 300) {
       const data = await response.json() as GiteaFileContent;

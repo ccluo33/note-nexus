@@ -18,7 +18,6 @@ import ModelSelect from "./modelSelect"
 import { useState, useRef } from "react"
 import { createOpenAIClient } from "@/lib/ai"
 import { toast } from "@/hooks/use-toast"
-import { fetch } from "@tauri-apps/plugin-http"
 
 interface ModelCardProps {
   modelConfig: ModelConfig

@@ -40,7 +40,9 @@ export function FolderItem({ item }: { item: DirTree }) {
     collapsibleList,
     setCollapsibleList,
     fileTree,
-    setFileTree
+    setFileTree,
+    selectedFolder,
+    setSelectedFolder
   } = useArticleStore()
 
   const path = computedParentPath(item)
@@ -238,23 +240,28 @@ export function FolderItem({ item }: { item: DirTree }) {
             await mkdir(pathOptions.path, { baseDir: pathOptions.baseDir })
           }
           
-          // 更新缓存树
-          if (parentFolder && parentFolder.children) {
-            const index = parentFolder.children?.findIndex(item => item.name === '')
-            parentFolder.children[index].name = sanitizedName
-            parentFolder.children[index].isEditing = false
+          // 更新缓存树 - 修复：使用 currentFolder 作为父目录，而不是 parentFolder
+          if (currentFolder && currentFolder.children) {
+            const index = currentFolder.children.findIndex(item => item.name === '')
+            if (index !== -1) {
+              currentFolder.children[index].name = sanitizedName
+              currentFolder.children[index].isEditing = false
+            }
           } else {
-            const index = cacheTree?.findIndex(item => item.name === '')
-            cacheTree[index].name = sanitizedName
-            cacheTree[index].isEditing = false
+            const index = cacheTree.findIndex(item => item.name === '')
+            if (index !== -1) {
+              cacheTree[index].name = sanitizedName
+              cacheTree[index].isEditing = false
+            }
           }
         }
       } else {
         // 处理空名称情况（取消新建）
-        if (currentFolder?.parent) {
-          const index = currentFolder?.parent?.children?.findIndex(item => item.name === '')
-          if (index !== undefined && index !== -1 && currentFolder?.parent?.children) {
-            currentFolder.parent?.children?.splice(index, 1)
+        // 修复：使用 currentFolder 作为父目录，而不是 parentFolder
+        if (currentFolder && currentFolder.children) {
+          const index = currentFolder.children.findIndex(item => item.name === '')
+          if (index !== -1) {
+            currentFolder.children.splice(index, 1)
           }
         } else {
           const index = cacheTree.findIndex(item => item.name === '')
@@ -318,10 +325,11 @@ export function FolderItem({ item }: { item: DirTree }) {
 
 
   function handleEditEnd() {
-    if (currentFolder?.parent) {
-      const index = currentFolder?.parent?.children?.findIndex(item => item.name === '')
-      if (index !== undefined && index !== -1 && currentFolder?.parent?.children) {
-        currentFolder.parent?.children?.splice(index, 1)
+    // 修复：使用 currentFolder 作为父目录，而不是 parentFolder
+    if (currentFolder && currentFolder.children) {
+      const index = currentFolder.children.findIndex(item => item.name === '')
+      if (index !== -1) {
+        currentFolder.children.splice(index, 1)
       }
     } else {
       const index = cacheTree.findIndex(item => item.name === '')
@@ -372,24 +380,25 @@ export function FolderItem({ item }: { item: DirTree }) {
                   />
                 </> :
                 <div
-                  onDrop={(e) => handleDrop(e)}
-                  onDragOver={e => handleDragOver(e)}
-                  onDragLeave={(e) => handleDragleave(e)}
-                  className={`${item.isLocale ? '' : 'opacity-50'} flex gap-1 items-center flex-1 select-none`}
-                >
-                  <div className="flex flex-1 gap-1 select-none relative">
-                    <div className="relative">
-                      {item.loading ? (
-                        <Loader2 className="size-4 animate-spin text-primary" />
-                      ) : collapsibleList.includes(path) ? 
-                        (assetsPath === item.name ? <FolderOpenDot className="size-4" /> : <FolderOpen className="size-4" />) :
-                        (assetsPath === item.name ? <FolderDot className="size-4" /> : <Folder className="size-4" />)
-                      }
-                      {!item.loading && item.sha && item.isLocale && <Cloud className="size-2.5 absolute left-0 bottom-0 z-10 bg-primary-foreground" />}
-                    </div>
-                    <span className={`text-xs line-clamp-1 ${item.loading ? 'text-muted-foreground' : ''}`}>{item.name}</span>
-                  </div>
+              onDrop={(e) => handleDrop(e)}
+              onDragOver={e => handleDragOver(e)}
+              onDragLeave={(e) => handleDragleave(e)}
+              onClick={() => setSelectedFolder(path)}
+              className={`${item.isLocale ? '' : 'opacity-50'} flex gap-1 items-center flex-1 cursor-pointer hover:bg-primary/10 rounded-sm`}
+            >
+              <div className={`flex flex-1 gap-1 relative ${selectedFolder === path ? 'bg-primary/15 rounded-sm' : ''}`}>
+                <div className="relative">
+                  {item.loading ? (
+                    <Loader2 className="size-4 animate-spin text-primary" />
+                  ) : collapsibleList.includes(path) ? 
+                    (assetsPath === item.name ? <FolderOpenDot className="size-4" /> : <FolderOpen className="size-4" />) :
+                    (assetsPath === item.name ? <FolderDot className="size-4" /> : <Folder className="size-4" />)
+                  }
+                  {!item.loading && item.sha && item.isLocale && <Cloud className="size-2.5 absolute left-0 bottom-0 z-10 bg-primary-foreground" />}
                 </div>
+                <span className={`text-xs line-clamp-1 ${item.loading ? 'text-muted-foreground' : ''}`}>{item.name}</span>
+              </div>
+            </div>
             }
           </div>
         </ContextMenuTrigger>

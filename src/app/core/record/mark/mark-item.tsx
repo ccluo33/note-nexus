@@ -19,7 +19,7 @@ import useTagStore from "@/stores/tag";
 import { LocalImage } from "@/components/local-image";
 import { fetchAiDesc } from "@/lib/ai";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { appDataDir } from "@tauri-apps/api/path";
+import { appDataDir } from "@/lib/browser-adapter/path";
 import { ImageUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { open } from "@/lib/browser-adapter/shell";

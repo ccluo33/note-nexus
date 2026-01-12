@@ -8,7 +8,7 @@ import useArticleStore from "@/stores/article"
 import { debounce } from "lodash-es"
 import { open as openDialog } from "@/lib/browser-adapter/dialog"
 import { readDir, copyFile, mkdir, exists } from "@/lib/browser-adapter/fs"
-import { join } from '@tauri-apps/api/path'
+import { join } from '@/lib/browser-adapter/path'
 import { getWorkspacePath } from '@/lib/workspace'
 import { toast } from '@/hooks/use-toast'
 
@@ -93,7 +93,7 @@ export function FileActions() {
       
       // 获取工作区路径
       const workspace = await getWorkspacePath()
-      const targetDir = workspace.isCustom ? workspace.path : await join(await import('@tauri-apps/api/path').then(m => m.appDataDir()), 'article')
+      const targetDir = workspace.isCustom ? workspace.path : await join(await import('@/lib/browser-adapter/path').then(m => m.appDataDir()), 'article')
       
       // 递归复制所有 markdown 文件和图片
       const copiedCount = await copyMarkdownFilesRecursively(selectedPath as string, targetDir)

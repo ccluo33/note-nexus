@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Store } from "@/lib/browser-adapter/store"
-import { invoke } from '@tauri-apps/api/core'
+// 导入浏览器适配器的invoke函数
+import { invoke } from '@/lib/browser-adapter/core';
 
 export enum WebDAVConnectionState {
   checking = 'checking',

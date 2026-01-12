@@ -19,7 +19,6 @@ export default function ShortcutsInput({
   const { shortcuts, setShortcut, resetDefault } = useShortcutStore()
   const [isFocus, setIsFocus] = useState(false)
   const [value, setValue] = useState('')
-  const [keys, setKeys] = useState<string[]>([])
   const inputRef = useRef<HTMLDivElement>(null)
 
   const shorcut = useMemo(() => {
@@ -37,14 +36,12 @@ export default function ShortcutsInput({
       setIsFocus(false)
       hotkeys.unbind('*')
       await setShortcut(name, value)
-      setKeys([])
     }
   })
 
   async function handleSetFocus() {
     if (disabled) return
     setIsFocus(true)
-    setKeys([])
     hotkeys('*', (event) => {
       let key = ''
       switch (event.key) {
@@ -64,11 +61,10 @@ export default function ShortcutsInput({
           key = event.key.charAt(0).toUpperCase() + event.key.slice(1)
           break;
       }
-      setKeys(prev => {
-        const newKeys = [...prev, key]
+      setValue(prev => {
+        const newKeys = [...(prev ? prev.split('+') : []), key]
         const uniqueKeys = uniq(newKeys)
-        setValue(uniqueKeys.join('+'))
-        return uniqueKeys
+        return uniqueKeys.join('+')
       })
     })
   }

@@ -2,7 +2,6 @@ import { toast } from '@/hooks/use-toast';
 import { Store } from "@/lib/browser-adapter/store";
 import { v4 as uuid } from 'uuid';
 import { GithubError, GithubRepoInfo, OctokitResponse } from './github.types';
-import { fetch, Proxy } from '@tauri-apps/plugin-http'
 
 export function uint8ArrayToBase64(data: Uint8Array) {
   return Buffer.from(data).toString('base64');
@@ -57,12 +56,6 @@ export async function uploadFile(
   const githubUsername = await store.get('githubUsername')
   const id = uuid()
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     let _filename = ''
     if (filename) {
@@ -88,8 +81,7 @@ export async function uploadFile(
         message: message || `Upload ${filename || id}`,
         content: file,
         sha
-      }),
-      proxy
+      })
     };
     
     const url = `https://api.github.com/repos/${githubUsername}/${repo}/contents${_path}/${_filename}`;
@@ -126,12 +118,6 @@ export async function getFiles({ path, repo }: { path: string, repo: string }) {
   const githubUsername = await store.get('githubUsername')
   path = encodeURIComponent(path.replace(/\s/g, '_'))
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     // 设置请求头
     const headers = new Headers();
@@ -142,8 +128,7 @@ export async function getFiles({ path, repo }: { path: string, repo: string }) {
     
     const requestOptions = {
       method: 'GET',
-      headers,
-      proxy
+      headers
     };
     
     const url = `https://api.github.com/repos/${githubUsername}/${repo}/contents/${path}`;
@@ -179,12 +164,6 @@ export async function deleteFile(
   
   const githubUsername = username || await store.get('githubUsername')
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     // 设置请求头
     const headers = new Headers();
@@ -199,8 +178,7 @@ export async function deleteFile(
       body: JSON.stringify({
         sha,
         message: `Delete ${path}`
-      }),
-      proxy
+      })
     };
     
     const url = `https://api.github.com/repos/${githubUsername}/${repo}/contents/${encodeURIComponent(path)}`;
@@ -226,12 +204,6 @@ export async function getFileCommits({ path, repo }: { path: string, repo: strin
   const githubUsername = await store.get('githubUsername')
   path = encodeURIComponent(path.replace(/\s/g, '_'))
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     // 设置请求头
     const headers = new Headers();
@@ -242,8 +214,7 @@ export async function getFileCommits({ path, repo }: { path: string, repo: strin
     
     const requestOptions = {
       method: 'GET',
-      headers,
-      proxy
+      headers
     };
     
     const url = `https://api.github.com/repos/${githubUsername}/${repo}/commits?path=${path}`;
@@ -265,12 +236,6 @@ export async function getUserInfo(token?: string) {
   const accessToken = token || await store.get('accessToken')
   if (!accessToken) return;
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     // 设置请求头
     const headers = new Headers();
@@ -280,8 +245,7 @@ export async function getUserInfo(token?: string) {
     
     const requestOptions = {
       method: 'GET',
-      headers,
-      proxy
+      headers
     };
     
     const url = 'https://api.github.com/user';
@@ -307,12 +271,6 @@ export async function checkSyncRepoState(name: string) {
   const accessToken = await store.get('accessToken')
   if (!accessToken) return;
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   // 设置请求头
   const headers = new Headers();
   headers.append('Authorization', `Bearer ${accessToken}`);
@@ -321,19 +279,18 @@ export async function checkSyncRepoState(name: string) {
   
   const requestOptions = {
     method: 'GET',
-    headers,
-    proxy
+    headers
   };
   
   const url = `https://api.github.com/repos/${githubUsername}/${name}`;
   const response = await fetch(url, requestOptions);
-  
-  if (response.status >= 200 && response.status < 300) {
-    const data = await response.json();
-    return data;
-  }
-  
-  return false
+    
+    if (response.status >= 200 && response.status < 300) {
+      const data = await response.json();
+      return data;
+    }
+    
+    return false
 }
 
 // 创建 Github 仓库
@@ -341,12 +298,6 @@ export async function createSyncRepo(name: string, isPrivate?: boolean) {
   const store = await Store.load('store.json');
   const accessToken = await store.get('accessToken')
   if (!accessToken) return;
-  
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
   
   try {
     // 设置请求头
@@ -363,8 +314,7 @@ export async function createSyncRepo(name: string, isPrivate?: boolean) {
         name,
         description: 'This is a NoteGen sync repository.',
         private: isPrivate
-      }),
-      proxy
+      })
     };
     
     const url = 'https://api.github.com/user/repos';
@@ -386,12 +336,6 @@ export async function getRelease() {
   const accessToken = await store.get('accessToken')
   if (!accessToken) return;
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     // 设置请求头
     const headers = new Headers();
@@ -402,8 +346,7 @@ export async function getRelease() {
     
     const requestOptions = {
       method: 'GET',
-      headers,
-      proxy
+      headers
     };
     
     const url = `https://api.github.com/repos/codexu/note-gen/releases/latest`;

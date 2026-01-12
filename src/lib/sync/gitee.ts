@@ -1,7 +1,6 @@
 import { toast } from '@/hooks/use-toast';
 import { Store } from "@/lib/browser-adapter/store";
 import { v4 as uuid } from 'uuid';
-import { fetch, Proxy } from '@tauri-apps/plugin-http'
 // Remove unused imports - these types are not actually used in this file
 
 // 自定义类型，类似于 GitHub 的响应
@@ -130,12 +129,6 @@ export async function uploadFile(
   const giteeUsername = await store.get('giteeUsername')
   const id = uuid()
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
   try {
     let _filename = ''
     if (filename) {
@@ -162,8 +155,7 @@ export async function uploadFile(
         message: message || `Upload ${filename || id}`,
         branch: 'master', // 默认使用 master 分支，可以根据需要调整
         sha
-      }),
-      proxy
+      })
     };
     
     const url = `https://gitee.com/api/v5/repos/${giteeUsername}/${repo}/contents${_path}/${_filename}`;

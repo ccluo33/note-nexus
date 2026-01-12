@@ -29,19 +29,29 @@ export async function open(options?: {
       input.accept = accept;
     }
 
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) {
         resolve(null);
         return;
       }
 
+      // 保存文件到IndexedDB
+      const { writeFile } = await import('./fs');
+      const savedPaths: string[] = [];
+
+      for (const file of Array.from(files)) {
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const path = `/tmp/${file.name}`;
+        await writeFile(path, uint8Array);
+        savedPaths.push(path);
+      }
+
       if (options?.multiple) {
-        // 返回文件路径数组（在浏览器中，我们返回文件名）
-        const paths = Array.from(files).map(file => file.name);
-        resolve(paths);
+        resolve(savedPaths);
       } else {
-        resolve(files[0].name);
+        resolve(savedPaths[0]);
       }
     };
 

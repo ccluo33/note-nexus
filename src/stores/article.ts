@@ -67,6 +67,9 @@ interface NoteState {
   newFile: () => void
   newFileOnFolder: (path: string) => void
   newFolderInFolder: (path: string) => void
+  
+  selectedFolder: string | null
+  setSelectedFolder: (folder: string | null) => void
 
   collapsibleList: string[]
   initCollapsibleList: () => Promise<void>
@@ -189,6 +192,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
     set({ activeFilePath: path })
     const store = await Store.load('store.json');
     await store.set('activeFilePath', path)
+    // 当切换文档时，自动加载新文件的内容
+    await get().readArticle(path)
   },
 
   matchPosition: null,
@@ -218,6 +223,11 @@ const useArticleStore = create<NoteState>((set, get) => ({
   },
   fileTreeLoading: false,
   remoteSyncLoading: false,
+  
+  selectedFolder: null,
+  setSelectedFolder: (folder: string | null) => {
+    set({ selectedFolder: folder })
+  },
   updateFileStats: async (basePath: string, tree: DirTree[]) => {
     const workspace = await getWorkspacePath()
     
@@ -773,17 +783,18 @@ const useArticleStore = create<NoteState>((set, get) => ({
   newFile: async () => {
     // 检查现有树中是否已有空文件名的文件（正在编辑中）
     const cacheTree = cloneDeep(get().fileTree)
-    const exists = cacheTree.find(item => item.name === '' && item.isFile)
-    if (exists) {
-      return
-    }
-  
-    // 判断 activeFilePath 是否存在 parent
-    const path = get().activeFilePath;
-    if (path.includes('/')) {
-      // 在当前活动文件的父文件夹下创建新文件
-      const folderPath = path.split('/').slice(0, -1).join('/')
-      const currentFolder = getCurrentFolder(folderPath, cacheTree)
+    
+    // 优先使用选中的文件夹
+    const selectedFolder = get().selectedFolder
+    // 如果没有选中的文件夹，使用当前活动文件的父文件夹
+    const activeFilePath = get().activeFilePath
+    const activeFileFolder = activeFilePath.includes('/') ? activeFilePath.split('/').slice(0, -1).join('/') : null
+    
+    let targetFolderPath: string | null = selectedFolder || activeFileFolder
+    
+    if (targetFolderPath) {
+      // 在目标文件夹下创建新文件
+      const currentFolder = getCurrentFolder(targetFolderPath, cacheTree)
       
       // 如果文件夹中已经有一个空名称的文件，不再创建新的
       if (currentFolder?.children?.find(item => item.name === '' && item.isFile)) {
@@ -792,8 +803,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
       
       // 确保文件夹是展开状态
       const collapsibleList = get().collapsibleList
-      if (!collapsibleList.includes(folderPath)) {
-        collapsibleList.push(folderPath)
+      if (!collapsibleList.includes(targetFolderPath)) {
+        collapsibleList.push(targetFolderPath)
         set({ collapsibleList })
       }
       
@@ -814,7 +825,11 @@ const useArticleStore = create<NoteState>((set, get) => ({
         set({ fileTree: cacheTree })
       }
     } else {
-      // 不存在 parent，直接在根目录下创建
+      // 检查根目录是否已有空文件名的文件
+      if (cacheTree.find(item => item.name === '' && item.isFile)) {
+        return
+      }
+      // 在根目录下创建
       const newFile: DirTree = {
         name: '',
         path: '',
@@ -997,31 +1012,50 @@ const useArticleStore = create<NoteState>((set, get) => ({
         set({ currentArticle: content })
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
+        // 文件不存在，创建一个空文件
         try {
-          // 如果本地文件不存在，尝试从Github/Gitee读取
-          const store = await Store.load('store.json');
-          const primaryBackupMethod = await store.get<string>('primaryBackupMethod') || 'github';
-          let content = '';
-          switch (primaryBackupMethod) {
-            case 'github':
-              const githubRepo2 = await getSyncRepoName('github');
-              content = decodeBase64ToString(await getGithubFiles({ path, repo: githubRepo2 }))
-              break;
-            case 'gitee':
-              const giteeRepo2 = await getSyncRepoName('gitee');
-              content = decodeBase64ToString(await getGiteeFiles({ path, repo: giteeRepo2 }))
-              break;
-            case 'gitlab':
-              const gitlabRepo2 = await getSyncRepoName('gitlab');
-              content = decodeBase64ToString((await getGitlabFileContent({ path, ref: 'main', repo: gitlabRepo2 })).content)
-              break;
-            default:
-              break;
+          const workspace = await getWorkspacePath()
+          const pathOptions = await getFilePathOptions(path)
+          
+          // 创建空文件
+          if (workspace.isCustom) {
+            await writeTextFile(pathOptions.path, '')
+          } else {
+            await writeTextFile(pathOptions.path, '', { baseDir: pathOptions.baseDir })
           }
-          set({ currentArticle: content })
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_) {
-          // 文件既不在本地也不在远程
+          
+          // 设置当前文章为空白
+          set({ currentArticle: '' })
+        } catch (createError) {
+          console.error('Failed to create empty file:', createError)
+          // 如果创建失败，尝试从远程读取
+          try {
+            // 尝试从Github/Gitee读取
+            const store = await Store.load('store.json');
+            const primaryBackupMethod = await store.get<string>('primaryBackupMethod') || 'github';
+            let content = '';
+            switch (primaryBackupMethod) {
+              case 'github':
+                const githubRepo2 = await getSyncRepoName('github');
+                content = decodeBase64ToString(await getGithubFiles({ path, repo: githubRepo2 }))
+                break;
+              case 'gitee':
+                const giteeRepo2 = await getSyncRepoName('gitee');
+                content = decodeBase64ToString(await getGiteeFiles({ path, repo: giteeRepo2 }))
+                break;
+              case 'gitlab':
+                const gitlabRepo2 = await getSyncRepoName('gitlab');
+                content = decodeBase64ToString((await getGitlabFileContent({ path, ref: 'main', repo: gitlabRepo2 })).content)
+                break;
+              default:
+                break;
+            }
+            set({ currentArticle: content })
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (_) {
+            // 文件既不在本地也不在远程，设置为空白
+            set({ currentArticle: '' })
+          }
         }
       }
     } else {

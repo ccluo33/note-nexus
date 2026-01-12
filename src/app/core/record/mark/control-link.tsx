@@ -16,8 +16,87 @@ import useMarkStore from "@/stores/mark"
 import useTagStore from "@/stores/tag"
 import { Link } from "lucide-react"
 import { useState } from "react"
-import { fetch } from '@tauri-apps/plugin-http'
 import { v4 as uuidv4 } from 'uuid'
+import { invoke } from "@/lib/browser-adapter/core"
+import { summarizeWebContent } from "@/lib/ai"
+
+// 解析 HTML 内容
+async function parseHtmlContent(html: string, url: string): Promise<{
+  title: string;
+  meta_desc: string;
+  main_content: string;
+}> {
+  return new Promise((resolve) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // 1. 获取标题
+    let title = doc.title;
+    if (!title) {
+      const titleTag = doc.querySelector('meta[property="og:title"]');
+      if (titleTag) {
+        title = titleTag.getAttribute('content') || '';
+      }
+    }
+    if (!title) {
+      title = new URL(url).hostname;
+    }
+
+    // 2. 获取描述
+    let metaDesc = '';
+    const descTag = doc.querySelector('meta[name="description"]');
+    if (descTag) {
+      metaDesc = descTag.getAttribute('content') || '';
+    }
+    if (!metaDesc) {
+      const ogDesc = doc.querySelector('meta[property="og:description"]');
+      if (ogDesc) {
+        metaDesc = ogDesc.getAttribute('content') || '';
+      }
+    }
+
+    // 3. 获取正文
+    let mainContent = '';
+    
+    // 尝试查找主要内容容器
+    const selectors = ['main', 'article', '#content', '.content', '#main', '.main'];
+    let contentElement = null;
+    
+    for (const selector of selectors) {
+      contentElement = doc.querySelector(selector);
+      if (contentElement) break;
+    }
+    
+    // 如果没找到特定容器，回退到 body
+    if (!contentElement) {
+      contentElement = doc.body;
+    }
+    
+    if (contentElement) {
+      // 移除脚本和样式标签
+      const scripts = contentElement.querySelectorAll('script, style, noscript, iframe, svg');
+      scripts.forEach(node => node.remove());
+      
+      // 获取文本内容
+      mainContent = contentElement.textContent || '';
+      
+      // 清理空白字符
+      mainContent = mainContent.replace(/\s+/g, ' ').trim();
+      
+      // 截断内容
+      if (mainContent.length > 10000) {
+        mainContent = mainContent.substring(0, 10000);
+      }
+    }
+
+    resolve({
+      title,
+      meta_desc: metaDesc,
+      main_content: mainContent
+    });
+  });
+}
+
 
 export function ControlLink() {
   const t = useTranslations();
@@ -48,123 +127,152 @@ export function ControlLink() {
       startTime: Date.now()
     })
     
-    try {
-      setQueue(queueId, { progress: '30%' });
-      
-      // 使用 Tauri 的 HTTP 插件获取页面内容
-      const response = await fetch(targetUrl, {
-        method: 'GET',
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP 错误: ${response.status}`);
-      }
-      
-      setQueue(queueId, { progress: '60%' });
-      
-      // 获取 HTML 内容
-      const html = await response.text();
+    // 为整个处理流程设置全局超时（60秒）
+    const globalTimeout = new Promise((_, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('全局处理超时'));
+      }, 60000);
+      // 返回清理函数
+      return () => clearTimeout(timer);
+    });
+    
+    // 处理流程Promise
+    const processPromise = (async () => {
+      try {
+        setQueue(queueId, { progress: '20%' });
+        
+        // 使用后端 API 获取页面内容
+        const pageContent = await invoke<{
+          title: string;
+          meta_desc: string;
+          main_content: string;
+          url: string;
+        }>('fetch_url_content', { url: targetUrl });
+        
+        setQueue(queueId, { progress: '40%' });
 
-      // 创建一个 DOMParser 来解析 HTML
-      const pageContent = await parseHtmlContent(html, targetUrl);
-      
-      setQueue(queueId, { progress: '90%' });
-      
-      if (pageContent.error) {
-        throw new Error(pageContent.error);
+        const title = pageContent.title;
+        const metaDesc = pageContent.meta_desc;
+        const mainContent = pageContent.main_content;
+        let summary = '';
+        
+        // 如果获取到了主要内容，调用AI进行总结
+        if (mainContent && mainContent.length > 0) {
+            setQueue(queueId, { progress: '50%' });
+            console.log('开始总结网页内容...');
+            try {
+                summary = await summarizeWebContent(mainContent, title) || '';
+                console.log('网页内容总结完成:', summary);
+            } catch (summaryError) {
+                console.warn('AI总结失败，继续执行:', summaryError);
+                summary = '';
+            }
+        }
+        
+        setQueue(queueId, { progress: '80%' });
+        
+        // 构建描述
+        let desc = `${title}\n${metaDesc}`;
+        
+        // 如果有总结内容，添加到描述中
+        if (summary) {
+          desc = `${title}\n${summary}`;
+        }
+        
+        setQueue(queueId, { progress: '90%' });
+        
+        // 保存到数据库
+        await insertMark({ 
+          tagId: currentTagId, 
+          type: 'link', 
+          desc: desc, 
+          content: mainContent,
+          url: targetUrl 
+        });
+        
+        // 刷新数据
+        await Promise.all([
+          fetchMarks(),
+          fetchTags()
+        ]);
+        getCurrentTag();
+        
+        setUrl('');
+        setOpen(false);
+      } catch (error) {
+        console.error('Error saving link:', error);
+        
+        // 最后的保障：即使出现其他错误，也要尝试保存链接
+        try {
+          const urlObj = new URL(targetUrl);
+          const domain = urlObj.hostname;
+          const desc = `${domain} - ${targetUrl}`;
+          
+          await insertMark({ 
+            tagId: currentTagId, 
+            type: 'link', 
+            desc: desc, 
+            content: '',
+            url: targetUrl 
+          });
+          
+          // 刷新数据
+          await Promise.all([
+            fetchMarks(),
+            fetchTags()
+          ]);
+          getCurrentTag();
+          
+          setUrl('');
+          setOpen(false);
+        } catch (finalError) {
+          console.error('Failed to save link even in fallback mode:', finalError);
+          throw finalError;
+        }
       }
-      
-      // 提取有用的内容
-      const { title, metaDesc, mainContent, bodyText } = pageContent;
-      
-      // 构建描述
-      const desc = `${title}\n${metaDesc}`;
-      
-      // 构建内容（优先使用主要内容，如果没有则使用正文）
-      const content = mainContent || bodyText;
-      
-      // 保存到数据库
-      await insertMark({ 
-        tagId: currentTagId, 
-        type: 'link', 
-        desc: desc, 
-        content: content,
-        url: targetUrl 
-      });
-      
-      await fetchMarks();
-      await fetchTags();
-      getCurrentTag();
-      
-      setUrl('');
-      setOpen(false);
-      
+    })();
+    
+    try {
+      // 使用Promise.race确保处理流程不会超过全局超时时间
+      await Promise.race([processPromise, globalTimeout]);
     } catch (error) {
-      console.error('Error crawling page:', error);
+      console.error('链接处理失败:', error);
+      
+      // 超时或其他严重错误时，尝试保存基本链接信息
+      try {
+        const urlObj = new URL(targetUrl);
+        const domain = urlObj.hostname;
+        const desc = `${domain} - ${targetUrl}`;
+        
+        await insertMark({ 
+          tagId: currentTagId, 
+          type: 'link', 
+          desc: desc, 
+          content: '',
+          url: targetUrl 
+        });
+        
+        // 刷新数据
+        await Promise.all([
+          fetchMarks(),
+          fetchTags()
+        ]);
+        getCurrentTag();
+        
+        setUrl('');
+        setOpen(false);
+      } catch (finalError) {
+        console.error('Failed to save link in emergency fallback:', finalError);
+      }
     } finally {
-      removeQueue(queueId);
+      // 确保在所有情况下都能清理资源
+      try {
+        removeQueue(queueId);
+      } catch (cleanupError) {
+        console.error('清理队列项失败:', cleanupError);
+      }
       setLoading(false);
     }
-  }
-
-  // 在浏览器环境中解析 HTML 内容
-  function parseHtmlContent(html: string, url: string): Promise<any> {
-    return new Promise((resolve) => {
-      try {
-        // 创建一个临时的 div 元素
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        // 获取页面标题
-        const title = doc.title || new URL(url).hostname;
-        
-        // 获取元描述
-        const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute('content') || '';
-        
-        // 尝试获取主要内容
-        let mainContent = '';
-        const mainElement = doc.querySelector('main') || 
-                           doc.querySelector('article') || 
-                           doc.querySelector('#content') || 
-                           doc.querySelector('.content');
-        
-        if (mainElement) {
-          mainContent = mainElement.textContent || '';
-        }
-        
-        // 获取所有文本内容作为备选
-        let bodyText = '';
-        if (doc.body) {
-          bodyText = doc.body.textContent || '';
-        }
-        
-        // 限制文本长度
-        if (mainContent.length > 10000) {
-          mainContent = mainContent.substring(0, 10000);
-        }
-        
-        if (bodyText.length > 10000) {
-          bodyText = bodyText.substring(0, 10000);
-        }
-        
-        resolve({
-          title,
-          metaDesc,
-          mainContent,
-          bodyText,
-          url
-        });
-      } catch (error) {
-        resolve({ 
-          error: `解析 HTML 内容失败: ${error}`,
-          title: new URL(url).hostname,
-          metaDesc: '',
-          mainContent: '',
-          bodyText: '',
-          url
-        });
-      }
-    });
   }
 
   return (

@@ -8,14 +8,14 @@ import { ask } from "@/lib/browser-adapter/dialog";
 import { Store } from "@/lib/browser-adapter/store";
 import { RepoNames } from "@/lib/sync/github.types";
 import { cloneDeep } from "lodash-es";
-import { openPath } from "@tauri-apps/plugin-opener";
+
 import { computedParentPath, getCurrentFolder } from "@/lib/path";
 import { toast } from "@/hooks/use-toast";
 import { useTranslations } from "next-intl";
 import useClipboardStore from "@/stores/clipboard";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { convertImageByWorkspace } from "@/lib/utils";
-import { appDataDir, join } from '@tauri-apps/api/path';
+import { appDataDir, join } from '@/lib/browser-adapter/path';
 import { deleteFile } from "@/lib/sync/github";
 import { deleteFile as deleteGiteeFile } from "@/lib/sync/gitee";
 import { deleteFile as deleteGitlabFile } from "@/lib/sync/gitlab";
@@ -361,23 +361,12 @@ export function FileItem({ item }: { item: DirTree }) {
   }
 
   async function handleShowFileManager() {
-    // 获取工作区路径信息
-    const { getFilePathOptions, getWorkspacePath } = await import('@/lib/workspace')
-    const workspace = await getWorkspacePath()
-    
-    // 确定文件所在的目录路径
-    const folderPath = item.parent ? computedParentPath(item.parent) : ''
-    
-    // 根据工作区类型确定正确的路径
-    if (workspace.isCustom) {
-      // 自定义工作区 - 直接使用工作区路径
-      const pathOptions = await getFilePathOptions(folderPath)
-      openPath(pathOptions.path)
-    } else {
-      // 默认工作区 - 使用 AppData 目录
-      const appDir = await appDataDir()
-      openPath(await join(appDir, 'article', folderPath))
-    }
+    // 浏览器环境不支持直接打开文件管理器
+    toast({
+      title: t('context.viewDirectory'),
+      description: '浏览器环境不支持直接打开文件管理器',
+      variant: 'default'
+    })
   }
 
   async function handleDragStart(ev: React.DragEvent<HTMLDivElement>) {
@@ -456,10 +445,11 @@ export function FileItem({ item }: { item: DirTree }) {
   }
 
   async function handleEditEnd() {
+    // 修复：确保直接使用 currentFolder 作为父目录，而不是 parentFolder
     if (currentFolder && currentFolder.children) {
-      const index = currentFolder?.children?.findIndex(item => item.name === '')
-      if (index !== undefined && index !== -1 && currentFolder?.children) {
-        currentFolder?.children?.splice(index, 1)
+      const index = currentFolder.children.findIndex(item => item.name === '')
+      if (index !== -1) {
+        currentFolder.children.splice(index, 1)
       }
     } else {
       const index = cacheTree.findIndex(item => item.name === '')
@@ -473,7 +463,8 @@ export function FileItem({ item }: { item: DirTree }) {
 
   useEffect(() => {
     if (item.isEditing) {
-      setName(name)
+      setIsEditing(true)
+      setName(item.name)
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [item])

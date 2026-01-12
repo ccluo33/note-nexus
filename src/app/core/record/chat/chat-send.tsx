@@ -10,7 +10,7 @@ import { useImperativeHandle, forwardRef, useRef } from "react"
 import { useTranslations } from "next-intl"
 import useVectorStore from "@/stores/vector"
 import { getContextForQuery } from '@/lib/rag'
-import { invoke } from "@tauri-apps/api/core"
+import { invoke } from "@/lib/browser-adapter/core"
 import { MarkdownFile } from "@/lib/files"
 import { readTextFile } from "@/lib/browser-adapter/fs"
 import { getFilePathOptions, getWorkspacePath } from "@/lib/workspace"

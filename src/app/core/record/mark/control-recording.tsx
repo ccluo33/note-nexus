@@ -215,58 +215,8 @@ export function ControlRecording() {
         return
       }
 
-      // 移动端使用 HTML5 file input
-      if (isMobile) {
-        fileInputRef.current?.click()
-        return
-      }
-
-      // PC端使用 Tauri dialog
-      const selected = await open({
-        multiple: false,
-        filters: [{
-          name: 'Audio',
-          extensions: ['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac', 'wma', 'webm']
-        }]
-      })
-
-      if (!selected) return
-
-      // 读取文件
-      const filePath = selected as string
-      const fileData = await readFile(filePath)
-      
-      // 根据文件扩展名确定 MIME 类型
-      const extension = filePath.split('.').pop()?.toLowerCase()
-      const mimeType = extension === 'wav' ? 'audio/wav' :
-                      extension === 'mp3' ? 'audio/mpeg' :
-                      extension === 'm4a' ? 'audio/mp4' :
-                      extension === 'mp4' ? 'audio/mp4' :
-                      extension === 'ogg' ? 'audio/ogg' :
-                      extension === 'webm' ? 'audio/webm' :
-                      'audio/mpeg'
-      
-      // 将 Uint8Array 转换为 ArrayBuffer
-      const buffer = fileData.buffer.slice(fileData.byteOffset, fileData.byteOffset + fileData.byteLength) as ArrayBuffer
-      const audioBlob = new Blob([buffer], { type: mimeType })
-      
-      console.log('选择的文件:', filePath, 'MIME类型:', mimeType)
-
-      // 创建队列ID
-      const queueId = `recording-${Date.now()}`
-      
-      // 添加到队列中显示识别中的状态
-      addQueue({
-        queueId,
-        tagId: currentTagId,
-        type: 'recording',
-        progress: t('recording.processing'),
-        startTime: Date.now()
-      })
-      
-      // 后台异步识别
-      processTranscription(audioBlob, queueId)
-      
+      // 所有平台统一使用 HTML5 file input
+      fileInputRef.current?.click()
     } catch (error) {
       console.error('文件选择失败:', error)
       toast({
@@ -357,16 +307,14 @@ export function ControlRecording() {
 
   return (
     <>
-      {/* 移动端文件选择 */}
-      {isMobile && (
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac,.wma,.webm"
-          onChange={handleFileInputChange}
-          className="hidden"
-        />
-      )}
+      {/* 所有平台文件选择 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac,.wma,.webm"
+        onChange={handleFileInputChange}
+        className="hidden"
+      />
       
       <Tooltip>
         <TooltipTrigger asChild>

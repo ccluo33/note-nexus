@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+// 浏览器环境不支持 Tauri invoke，使用浏览器实现
 import type {
   MCPServerConfig,
   JSONRPCRequest,
@@ -37,16 +37,8 @@ export class MCPClient {
    * 连接 stdio 服务器
    */
   private async connectStdio(): Promise<void> {
-    try {
-      await invoke('start_mcp_stdio_server', {
-        serverId: this.config.id,
-        command: this.config.command,
-        args: this.config.args || [],
-        env: this.config.env || {},
-      })
-    } catch (error) {
-      throw new Error(`Failed to start stdio server: ${error}`)
-    }
+    // 浏览器环境不支持 stdio 服务器
+    throw new Error('Stdio servers are not supported in browser environment')
   }
   
   /**
@@ -147,13 +139,7 @@ export class MCPClient {
    * 断开连接
    */
   async disconnect(): Promise<void> {
-    if (this.config.type === 'stdio') {
-      try {
-        await invoke('stop_mcp_server', { serverId: this.config.id })
-      } catch {
-        // 静默处理错误
-      }
-    }
+    // 浏览器环境中，stdio 服务器不支持，HTTP 服务器不需要特殊断开处理
     this.isInitialized = false
   }
   
@@ -179,22 +165,8 @@ export class MCPClient {
    * 发送 stdio 请求
    */
   private async sendStdioRequest(request: JSONRPCRequest): Promise<any> {
-    try {
-      const responseStr = await invoke<string>('send_mcp_message', {
-        serverId: this.config.id,
-        message: JSON.stringify(request),
-      })
-      
-      const response: JSONRPCResponse = JSON.parse(responseStr)
-      
-      if (response.error) {
-        throw new Error(response.error.message)
-      }
-      
-      return response.result
-    } catch (error) {
-      throw new Error(`Stdio request failed: ${error}`)
-    }
+    // 浏览器环境不支持 stdio 请求
+    throw new Error('Stdio requests are not supported in browser environment')
   }
   
   /**
