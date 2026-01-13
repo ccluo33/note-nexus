@@ -62,16 +62,36 @@ async def get_similar_documents(request: SimilarQueryRequest):
         相似文档列表
     """
     try:
+        print(f"\n=== 接收到向量检索请求 ===")
+        print(f"查询向量维度: {len(request.query_embedding)}")
+        print(f"限制数量: {request.limit}")
+        print(f"相似度阈值: {request.similarity_threshold}")
+        print(f"查询向量前10个值: {request.query_embedding[:10]}")
+        
         similar_docs = chromadb_service.get_similar_documents(
             query_embedding=request.query_embedding,
             limit=request.limit,
             similarity_threshold=request.similarity_threshold
         )
+        
+        print(f"向量检索完成，返回 {len(similar_docs)} 个结果:")
+        for i, doc in enumerate(similar_docs):
+            print(f"  结果 {i+1}:")
+            print(f"    文件名: {doc['filename']}")
+            print(f"    相似度: {doc['similarity']:.4f}")
+            print(f"    内容预览: {doc['content'][:150]}...")
+            print(f"    文档ID: {doc['id']}")
+        
+        print("========================")
+        
         return {
             "status": "success",
             "data": similar_docs
         }
     except Exception as e:
+        import traceback
+        print(f"向量检索失败详细错误:")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"查询相似文档失败: {str(e)}")
 
 @router.delete("/{filename}", summary="删除文件向量", description="根据文件名删除所有相关向量")

@@ -192,11 +192,7 @@ export async function getFiles({ path, repo }: { path: string, repo: string }) {
   const giteeUsername = await store.get<string>('giteeUsername')
   path = path.replace(/\s/g, '_')
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
+  // 浏览器环境不支持直接设置proxy
   
   try {
     let access_token_param = ``
@@ -210,8 +206,7 @@ export async function getFiles({ path, repo }: { path: string, repo: string }) {
     const url = `https://gitee.com/api/v5/repos/${giteeUsername}/${repo}/contents/${path}${access_token_param}`;
     
     const requestOptions = {
-      method: 'GET',
-      proxy
+      method: 'GET'
     };
     
     try {
@@ -242,12 +237,8 @@ export async function deleteFile({ path, sha, repo }: { path: string, sha: strin
   
   const giteeUsername = await store.get('giteeUsername')
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
+  // 浏览器环境不支持直接设置proxy
+
   try {
     // 设置请求头
     const headers = new Headers();
@@ -260,8 +251,7 @@ export async function deleteFile({ path, sha, repo }: { path: string, sha: strin
         access_token: accessToken,
         sha,
         message: `Delete ${path}`
-      }),
-      proxy
+      })
     };
     
     const url = `https://gitee.com/api/v5/repos/${giteeUsername}/${repo}/contents/${path}`;
@@ -295,12 +285,8 @@ export async function getFileCommits({ path, repo }: { path: string, repo: strin
   
   const giteeUsername = await store.get<string>('giteeUsername')
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
+  // 浏览器环境不支持直接设置proxy
+
   try {
     // 设置请求参数
     const params = new URLSearchParams();
@@ -308,8 +294,7 @@ export async function getFileCommits({ path, repo }: { path: string, repo: strin
     params.append('path', path);
     
     const requestOptions = {
-      method: 'GET',
-      proxy
+      method: 'GET'
     };
     
     const url = `https://gitee.com/api/v5/repos/${giteeUsername}/${repo}/commits?${params.toString()}`;
@@ -331,20 +316,15 @@ export async function getUserInfo() {
   const accessToken = await store.get<string>('giteeAccessToken')
   if (!accessToken) return;
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
+  // 浏览器环境不支持直接设置proxy
+
   try {
     // 设置请求参数
     const params = new URLSearchParams();
     params.append('access_token', accessToken);
     
     const requestOptions = {
-      method: 'GET',
-      proxy
+      method: 'GET'
     };
     
     const url = `https://gitee.com/api/v5/user?${params.toString()}`;
@@ -373,20 +353,15 @@ export async function checkSyncRepoState(name: string) {
   
   const giteeUsername = await store.get<string>('giteeUsername')
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
+  // 浏览器环境不支持直接设置proxy
+
   try {
     // 设置请求参数
     const params = new URLSearchParams();
     params.append('access_token', accessToken);
     
     const requestOptions = {
-      method: 'GET',
-      proxy
+      method: 'GET'
     };
     
     const url = `https://gitee.com/api/v5/repos/${giteeUsername}/${name}?${params.toString()}`;
@@ -415,12 +390,8 @@ export async function createSyncRepo(name: string, isPrivate?: boolean) {
   const accessToken = await store.get('giteeAccessToken')
   if (!accessToken) return;
   
-  // 获取代理设置
-  const proxyUrl = await store.get<string>('proxy')
-  const proxy: Proxy | undefined = proxyUrl ? {
-    all: proxyUrl
-  } : undefined
-  
+  // 浏览器环境不支持直接设置proxy
+
   try {
     // 设置请求头
     const headers = new Headers();
@@ -435,8 +406,7 @@ export async function createSyncRepo(name: string, isPrivate?: boolean) {
         private: isPrivate === undefined ? true : isPrivate,
         auto_init: false,
         description: '由 Note Gen 自动创建'
-      }),
-      proxy
+      })
     };
     
     const url = `https://gitee.com/api/v5/user/repos`;

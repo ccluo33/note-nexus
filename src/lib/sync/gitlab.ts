@@ -41,10 +41,7 @@ async function getCommonHeaders(): Promise<any> {
   return headers;
 }
 
-// 获取代理配置 - 浏览器环境不支持直接设置代理
-async function getProxyConfig(): Promise<undefined> {
-  return undefined;
-}
+// 浏览器环境不支持直接设置代理
 
 /**
  * 上传文件到 Gitlab 项目
@@ -164,14 +161,13 @@ export async function getFiles({ path, repo }: { path: string; repo: string }) {
 
     const baseUrl = await getGitlabApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const url = `${baseUrl}/projects/${projectId}/repository/tree?path=${path}`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -222,14 +218,13 @@ export async function deleteFile({ path, repo }: { path: string; sha?: string; r
 
     const baseUrl = await getGitlabApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // 获取文件的最新提交 ID
     const commitsUrl = `${baseUrl}/projects/${projectId}/repository/commits?path=${path}&per_page=1`;
     const commitsResponse = await fetch(commitsUrl, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     let lastCommitId = '';
@@ -249,8 +244,7 @@ export async function deleteFile({ path, repo }: { path: string; sha?: string; r
         branch: 'main',
         commit_message: `Delete ${path}`,
         last_commit_id: lastCommitId
-      }),
-      proxy
+      })
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -289,14 +283,13 @@ export async function getFileCommits({ path, repo }: { path: string; repo: strin
 
     const baseUrl = await getGitlabApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const url = `${baseUrl}/projects/${projectId}/repository/commits?path=${path}`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -329,15 +322,14 @@ export async function getFileContent({ path, ref, repo }: { path: string; ref: s
 
     const baseUrl = await getGitlabApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // 使用 Gitlab API 获取特定 commit 的文件内容
     const url = `${baseUrl}/projects/${projectId}/repository/files/${path.replace(/\//g, '%2F')}/raw?ref=${ref}`;
 
     const response = await encodeFetch(url, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     } as any);
 
     if (response.status >= 200 && response.status < 300) {
@@ -388,7 +380,7 @@ export async function getUserInfo(token?: string): Promise<GitlabUserInfo> {
     }
 
     const baseUrl = await getGitlabApiBaseUrl();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const headers = new Headers();
     headers.append('Authorization', `Bearer ${accessToken}`);
@@ -396,8 +388,7 @@ export async function getUserInfo(token?: string): Promise<GitlabUserInfo> {
 
     const response = await fetch(`${baseUrl}/user`, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -442,15 +433,14 @@ export async function checkSyncProjectState(name: string): Promise<GitlabProject
 
     const baseUrl = await getGitlabApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // 搜索项目
     const searchUrl = `${baseUrl}/projects?search=${name}&owned=true&per_page=10`;
     
     const response = await fetch(searchUrl, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -489,7 +479,7 @@ export async function createSyncProject(name: string, isPrivate: boolean = true)
   try {
     const baseUrl = await getGitlabApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const requestBody = {
       name: name,
@@ -503,8 +493,7 @@ export async function createSyncProject(name: string, isPrivate: boolean = true)
     const response = await fetch(`${baseUrl}/projects`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(requestBody),
-      proxy
+      body: JSON.stringify(requestBody)
     });
 
     if (response.status >= 200 && response.status < 300) {

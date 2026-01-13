@@ -86,16 +86,11 @@ export function MdEditor() {
       },
       link: {
         isOpen: true,
-        jumpBlank: true,
         click: (dom: Element) => {
           const href = dom.getAttribute('href') || dom.innerHTML
           if (!href) return
           open(href)
         }
-      },
-      table: {
-        maxRow: 20,
-        maxCol: 10,
       },
       preview: {
         hljs: {
@@ -152,6 +147,7 @@ export function MdEditor() {
       },
       mode: localMode,
       upload: {
+        accept: 'image/*',
         async handler(files: File[]) {
           const store = await Store.load('store.json');
           // 默认启用图床功能，除非明确设置为false
@@ -300,7 +296,7 @@ export function MdEditor() {
   async function uploadImages(files: File[]) {
     const list = await Promise.all(
       files.map((file) => {
-        return new Promise<string | undefined>(async(resolve, reject) => {
+        return new Promise<string | undefined>(async(resolve) => {
           if (!file.type.includes('image')) return resolve(undefined)
           const toastNotification = toast({
             title: '上传中',

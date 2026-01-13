@@ -88,11 +88,22 @@ class ChromaDBService:
         Returns:
             相似文档列表
         """
+        print(f"\n--- ChromaDB 内部检索 ---)")
+        print(f"查询向量维度: {len(query_embedding)}")
+        print(f"限制数量: {limit}")
+        print(f"相似度阈值: {similarity_threshold}")
+        print(f"查询向量前5个值: {query_embedding[:5]}")
+        
         results = self.collection.query(
             query_embeddings=[query_embedding],
             n_results=limit,
             include=["documents", "metadatas", "distances"]
         )
+        
+        print(f"ChromaDB 原始查询结果:")
+        print(f"  返回文档数量: {len(results['ids'][0])}")
+        print(f"  文档ID列表: {results['ids'][0]}")
+        print(f"  距离列表: {results['distances'][0]}")
         
         # 处理结果
         similar_docs = []
@@ -105,6 +116,13 @@ class ChromaDBService:
             # 转换距离为相似度（假设距离是欧几里得距离）
             similarity = 1 / (1 + distance) if distance is not None else 0
             
+            print(f"\n  处理文档 {i+1}:")
+            print(f"    文档ID: {doc_id}")
+            print(f"    原始距离: {distance}")
+            print(f"    转换后相似度: {similarity:.4f}")
+            print(f"    相似度阈值: {similarity_threshold}")
+            print(f"    是否通过阈值: {similarity >= similarity_threshold}")
+            
             if similarity >= similarity_threshold:
                 similar_docs.append({
                     "id": doc_id,
@@ -115,6 +133,9 @@ class ChromaDBService:
         
         # 按相似度排序
         similar_docs.sort(key=lambda x: x["similarity"], reverse=True)
+        
+        print(f"\n--- ChromaDB 检索完成 ---)")
+        print(f"通过阈值的文档数量: {len(similar_docs)}")
         
         return similar_docs
     

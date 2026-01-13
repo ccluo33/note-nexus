@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '@/lib/browser-adapter/core';
 
 // 匹配 Rust 类型的接口定义
 export interface SearchItem {

@@ -126,19 +126,52 @@ export async function invoke<T>(command: string, args?: any): Promise<T> {
       
       case 'vector_delete':
         // 向量删除命令
-        url = `${FULL_API_URL}/vector/${args?.filename}`;
+        url = `${FULL_API_URL}/vector/${encodeURIComponent(args?.filename || '')}`;
         method = 'DELETE';
         break;
       
       case 'vector_exists':
         // 检查向量是否存在命令
-        url = `${FULL_API_URL}/vector/exists/${args?.filename}`;
+        url = `${FULL_API_URL}/vector/exists/${encodeURIComponent(args?.filename || '')}`;
         method = 'GET';
         break;
       
       case 'rank_keywords':
-        // 关键词排名，在浏览器环境中返回空数组
-        return [] as T;
+        // 浏览器端关键词提取实现，支持中文和英文
+        const { text, topK = 5 } = args || {};
+        if (!text) return [] as T;
+        
+        // 定义常见停用词
+        const stopWords = new Set([
+          '的', '了', '和', '是', '在', '我', '有', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这',
+          'the', 'and', 'is', 'in', 'i', 'have', 'to', 'not', 'you', 'that', 'it', 'he', 'was', 'for', 'on', 'are', 'with', 'as', 'his', 'they', 'be', 'at', 'one', 'have', 'this'
+        ]);
+        
+        // 提取中文词语（2个或以上字符）和英文单词（2个或以上字符）
+        const chineseWords = text.match(/[\u4e00-\u9fa5]{2,}/g) || [];
+        const englishWords = text.match(/[a-zA-Z]{2,}/g) || [];
+        const words = [...chineseWords, ...englishWords];
+        
+        const wordCount: Record<string, number> = {};
+        
+        // 统计词频，过滤停用词
+        words.forEach(word => {
+          const lowerWord = word.toLowerCase();
+          if (!stopWords.has(lowerWord)) {
+            wordCount[word] = (wordCount[word] || 0) + 1;
+          }
+        });
+        
+        // 排序并返回前topK个关键词
+        const sortedWords = Object.entries(wordCount)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, topK)
+          .map(([text, count]) => ({
+            text,
+            weight: count / words.length // 权重为词频比例
+          }));
+        
+        return sortedWords as T;
       
       case 'export_app_data':
         // 导出应用数据，在浏览器环境中返回 undefined

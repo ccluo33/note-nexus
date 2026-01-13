@@ -1432,6 +1432,9 @@
           "description": "将选中的文本进行翻译",
           "selectContent": "请先选择一段内容",
           "promptTemplate": "将这段文字：\n{content}\n翻译为{language}语言，直接返回翻译后的结果。"
+        },
+        "upload": {
+          "tooltip": "上传图片"
         }
       }
     },

@@ -2,6 +2,12 @@ import { DirTree } from "@/stores/article"
 
 // 计算父目录路径
 export function computedParentPath(item: DirTree) {
+  // 优先使用item自身的path属性，如果存在则直接返回
+  if (item.path && item.path !== '') {
+    return item.path;
+  }
+  
+  // 否则通过父节点计算路径
   let path = item.name
   function readParentPath(item: DirTree) {
     if (item.parent) {

@@ -353,7 +353,7 @@ export function FolderItem({ item }: { item: DirTree }) {
       <CollapsibleTrigger className="w-full select-none">
         <ContextMenuTrigger asChild>
           <div className={`${isDragging ? 'file-on-drop' : ''} group file-manange-item flex select-none items-center`}>
-            <ChevronRight className="transition-transform size-4 ml-1 bg-sidebar group-hover:bg-transparent" />
+            <ChevronRight className={`transition-transform size-4 ml-1 bg-sidebar group-hover:bg-transparent ${collapsibleList.includes(path) ? 'rotate-90' : ''}`} />
             {
               isEditing ?
                 <>
@@ -383,7 +383,10 @@ export function FolderItem({ item }: { item: DirTree }) {
               onDrop={(e) => handleDrop(e)}
               onDragOver={e => handleDragOver(e)}
               onDragLeave={(e) => handleDragleave(e)}
-              onClick={() => setSelectedFolder(path)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedFolder(path);
+              }}
               className={`${item.isLocale ? '' : 'opacity-50'} flex gap-1 items-center flex-1 cursor-pointer hover:bg-primary/10 rounded-sm`}
             >
               <div className={`flex flex-1 gap-1 relative ${selectedFolder === path ? 'bg-primary/15 rounded-sm' : ''}`}>

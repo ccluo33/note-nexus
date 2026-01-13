@@ -71,7 +71,7 @@ export const createToolbarConfig = (t: any, editorWidth?: number) => {
     { name: 'check', tipPosition: 's' },
     { name: 'code', tipPosition: 's' },
     { name: 'inline-code', tipPosition: 's' },
-    { name: 'upload', tipPosition: 's' },
+    { name: 'upload', tipPosition: 's', tip: t('toolbar.upload.tooltip') },
     { name: 'link', tipPosition: 's' },
     { name: 'table', tipPosition: 's' },
   ]
@@ -112,7 +112,7 @@ export const createToolbarConfig = (t: any, editorWidth?: number) => {
     // 根据宽度逐步添加更多组
     if (editorWidth >= withLinkTableUploadWidth) {
       // 添加常用的 link、table、upload 按钮
-      config.push('|', { name: 'link', tipPosition: 's' }, { name: 'table', tipPosition: 's' }, { name: 'upload', tipPosition: 's' })
+      config.push('|', { name: 'link', tipPosition: 's' }, { name: 'table', tipPosition: 's' }, { name: 'upload', tipPosition: 's', tip: t('toolbar.upload.tooltip') })
     }
     
     if (editorWidth >= withLastWidth) {

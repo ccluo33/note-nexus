@@ -111,7 +111,8 @@ class IndexedDBFileSystem {
             resolve(result.content as string);
           }
         } else {
-          reject(new Error(`File not found: ${normalizedPath}`));
+          // 文件不存在时返回空字符串，而不是抛出错误
+          resolve('');
         }
       };
     });
@@ -145,7 +146,8 @@ class IndexedDBFileSystem {
             resolve(encoder.encode(result.content as string));
           }
         } else {
-          reject(new Error(`File not found: ${normalizedPath}`));
+          // 文件不存在时返回空的Uint8Array，而不是抛出错误
+          resolve(new Uint8Array());
         }
       };
     });

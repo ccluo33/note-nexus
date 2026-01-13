@@ -219,7 +219,31 @@ const useArticleStore = create<NoteState>((set, get) => ({
     set({ fileTree: sortedTree })
   },
   addFile: (file: DirTree) => {
-    set({ fileTree: [file, ...get().fileTree] })
+    const fileTree = cloneDeep(get().fileTree)
+    
+    // 解析文件路径，确定父文件夹
+    if (file.path.includes('/')) {
+      // 获取文件路径中除了文件名之外的部分（父文件夹路径）
+      const parentPath = file.path.split('/').slice(0, -1).join('/')
+      const currentFolder = getCurrentFolder(parentPath, fileTree)
+      
+      if (currentFolder) {
+        // 如果找到父文件夹，将文件添加到父文件夹的children数组中
+        currentFolder.children?.push(file)
+        // 确保文件的parent属性指向父文件夹
+        file.parent = currentFolder
+      } else {
+        // 如果找不到父文件夹，将文件添加到根目录
+        fileTree.unshift(file)
+      }
+    } else {
+      // 根目录文件，直接添加到根目录
+      fileTree.unshift(file)
+    }
+    
+    // 重新排序文件树
+    const sortedFileTree = get().sortFileTree(fileTree)
+    set({ fileTree: sortedFileTree })
   },
   fileTreeLoading: false,
   remoteSyncLoading: false,
@@ -304,10 +328,10 @@ const useArticleStore = create<NoteState>((set, get) => ({
     }
 
     // 读取工作区文件（仅根目录）
-    let dirs: DirTree[] = []
+    let rootItems: DirTree[] = []
     if (workspace.isCustom) {
       // 自定义工作区
-      dirs = (await readDir(workspace.path))
+      rootItems = (await readDir(workspace.path))
         .filter(file => file.name !== '.DS_Store' && !file.name.startsWith('.') && (file.isDirectory || file.name.endsWith('.md') || file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i))).map(file => ({
           ...file,
           isEditing: false,
@@ -316,11 +340,12 @@ const useArticleStore = create<NoteState>((set, get) => ({
           sha: '',
           createdAt: undefined,
           modifiedAt: undefined,
-          children: file.isDirectory ? [] : undefined
+          children: file.isDirectory ? [] : undefined,
+          path: file.name // 为根目录项设置路径
         }))
     } else {
       // 默认工作区
-      dirs = (await readDir('article', { baseDir: BaseDirectory.AppData }))
+      rootItems = (await readDir('article', { baseDir: BaseDirectory.AppData }))
         .filter(file => file.name !== '.DS_Store' && !file.name.startsWith('.') && (file.isDirectory || file.name.endsWith('.md') || file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i))).map(file => ({
           ...file,
           isEditing: false,
@@ -329,9 +354,13 @@ const useArticleStore = create<NoteState>((set, get) => ({
           sha: '',
           createdAt: undefined,
           modifiedAt: undefined,
-          children: file.isDirectory ? [] : undefined
+          children: file.isDirectory ? [] : undefined,
+          path: file.name // 为根目录项设置路径
         }))
     }
+    
+    // 将 rootItems 重命名为 dirs，保持后续代码兼容
+    let dirs = rootItems
     
     // 为已展开的文件夹加载子内容
     const collapsibleList = get().collapsibleList
@@ -378,7 +407,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
                 sha: '',
                 createdAt: undefined,
                 modifiedAt: undefined,
-                children: file.isDirectory ? [] : undefined
+                children: file.isDirectory ? [] : undefined,
+                path: `${folderPath}/${file.name}` // 设置完整路径
               })) as DirTree[]
           } else {
             const dirRelative = await toWorkspaceRelativePath(fullPath)
@@ -393,7 +423,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
                 sha: '',
                 createdAt: undefined,
                 modifiedAt: undefined,
-                children: file.isDirectory ? [] : undefined
+                children: file.isDirectory ? [] : undefined,
+                path: `${folderPath}/${file.name}` // 设置完整路径
               })) as DirTree[]
           }
         } catch (error) {
@@ -403,6 +434,11 @@ const useArticleStore = create<NoteState>((set, get) => ({
       }
       
       folder.children = children
+      
+      // 确保每个子文件的parent属性正确指向其父文件夹
+      for (const child of children) {
+        child.parent = folder
+      }
       
       // 递归加载子文件夹中已展开的文件夹
       for (const child of children) {
@@ -631,7 +667,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
               sha: '',
               createdAt: undefined,
               modifiedAt: undefined,
-              children: file.isDirectory ? [] : undefined
+              children: file.isDirectory ? [] : undefined,
+              path: `${fullpath}/${file.name}`
             })) as DirTree[]
         } else {
           const dirRelative = await toWorkspaceRelativePath(fullFolderPath)
@@ -646,7 +683,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
               sha: '',
               createdAt: undefined,
               modifiedAt: undefined,
-              children: file.isDirectory ? [] : undefined
+              children: file.isDirectory ? [] : undefined,
+              path: `${fullpath}/${file.name}`
             })) as DirTree[]
         }
       } catch (error) {
@@ -790,7 +828,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
     const activeFilePath = get().activeFilePath
     const activeFileFolder = activeFilePath.includes('/') ? activeFilePath.split('/').slice(0, -1).join('/') : null
     
-    let targetFolderPath: string | null = selectedFolder || activeFileFolder
+    const targetFolderPath: string | null = selectedFolder || activeFileFolder
     
     if (targetFolderPath) {
       // 在目标文件夹下创建新文件

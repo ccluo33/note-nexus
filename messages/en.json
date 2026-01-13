@@ -1368,6 +1368,9 @@
           "description": "Translate the selected text",
           "selectContent": "Please select content first",
           "promptTemplate": "Translate this text: \n{content}\n, into {language}, directly return the translated result."
+        },
+        "upload": {
+          "tooltip": "Upload Image"
         }
       }
     },

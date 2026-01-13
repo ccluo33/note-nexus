@@ -23,10 +23,10 @@ function Tree({ item }: { item: DirTree }) {
     <FileItem item={item} /> :
     <li>
       <Collapsible
-        onOpenChange={handleCollapse}
-        className="group/collapsible [&[data-state=open]>button>.file-manange-item>svg:first-child]:rotate-90"
-        open={collapsibleList.includes(path)}
-      >
+          onOpenChange={handleCollapse}
+          className="group/collapsible"
+          open={collapsibleList.includes(path)}
+        >
         <FolderItem item={item} />
         <CollapsibleContent className="pl-1">
           <ul className="pl-2">

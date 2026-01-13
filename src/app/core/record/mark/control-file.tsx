@@ -1,63 +1,47 @@
 import { TooltipButton } from "@/components/tooltip-button"
-import { FilePlus } from "lucide-react"
+import { ImagePlus } from "lucide-react"
 import { useTranslations } from 'next-intl'
 import { open } from "@/lib/browser-adapter/dialog";
-import { readTextFile } from "@/lib/browser-adapter/fs";
 import useTagStore from "@/stores/tag";
 import useMarkStore from "@/stores/mark";
 import { insertMark } from "@/db/marks";
 
-// 常见的代码格式
-const codeExtensions = [
-  // Web开发
-  'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'scss', 'sass', 'less', 'vue', 'svelte', 'php', 'mjs', 'mts',
-  // 编程语言
-  'py', 'java', 'cpp', 'c', 'cs', 'go', 'rb', 'rs', 'swift', 'kt', 'scala', 'dart', 'lua', 'r',
-  // 标记/配置
-  'json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'graphql', 'sql',
-  // Shell脚本
-  'sh', 'bash', 'zsh', 'fish', 'ps1',
-  // 其他
-  'asm', 'pl', 'clj', 'ex', 'elm', 'f90', 'hs', 'jl', 'swift', 'ml'
-];
-const textFileExtensions = ['txt', 'md', 'csv'];
-const fileExtensions: string[] = []
+// 图片扩展名
+const imageExtensions = ['png', 'jpeg', 'jpg', 'gif', 'webp','svg', 'bmp', 'ico'];
 
 export function ControlFile() {
   const t = useTranslations();
   const { currentTagId, fetchTags, getCurrentTag } = useTagStore()
   const { fetchMarks } = useMarkStore()
 
-  async function selectFile() {
-    const filePath = await open({
-      multiple: false,
+  async function selectImages() {
+    const filePaths = await open({
+      multiple: true,
       directory: false,
       filters: [{
-        name: 'files',
-        extensions: [...textFileExtensions, ...fileExtensions, ...codeExtensions]
+        name: 'Image',
+        extensions: imageExtensions
       }]
     });
-    if (!filePath) return
-    const path = Array.isArray(filePath) ? filePath[0] : filePath
-    await readFileByPath(path)
+    if (!filePaths) return
+    const paths = Array.isArray(filePaths) ? filePaths : [filePaths]
+    for (const path of paths) {
+      await uploadImage(path)
+    }
   }
 
-  async function readFileByPath(path: string) {
+  async function uploadImage(path: string) {
     const ext = path.substring(path.lastIndexOf('.') + 1)
-    if ([...textFileExtensions, ...codeExtensions].includes(ext)) {
-      const content = await readTextFile(path)
+    if (imageExtensions.includes(ext)) {
       // 提取文件名（不含路径）
       const fileName = path.split('/').pop() || path.split('\\').pop() || path
       // 构建描述：文件名
       const desc = fileName
-      // 内容保持原样，不添加文件名
-      const resetText = content.replace(/'/g, '')
       // 将完整路径存储在 url 字段，用于点击时打开文件夹
       await insertMark({ 
         tagId: currentTagId, 
-        type: 'file', 
-        desc: desc, 
-        content: resetText,
+        type: 'image', 
+        desc: desc,
         url: path 
       })
       await fetchMarks()
@@ -67,6 +51,6 @@ export function ControlFile() {
   }
 
   return (
-    <TooltipButton icon={<FilePlus />} tooltipText={t('record.mark.type.file')} onClick={selectFile} />
+    <TooltipButton icon={<ImagePlus />} tooltipText={t('record.mark.type.image')} onClick={selectImages} />
   )
 }

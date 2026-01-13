@@ -41,8 +41,13 @@ export async function getFilePathOptions(relativePath: string): Promise<{ path: 
     return { path: fullPath }
   } else {
     // 对于默认工作区，使用AppData作为baseDir
+    // 检查相对路径是否已经以article/开头，避免重复添加
+    let finalPath = relativePath
+    if (!finalPath.startsWith('article/') && !finalPath.startsWith('article')) {
+      finalPath = `article/${finalPath}`
+    }
     return { 
-      path: `article/${relativePath}`, 
+      path: finalPath, 
       baseDir: BaseDirectory.AppData 
     }
   }

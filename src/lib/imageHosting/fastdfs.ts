@@ -1,7 +1,7 @@
 import { Store } from "@/lib/browser-adapter/store";
 import { invoke } from "@/lib/browser-adapter/core";
 import { toast } from '@/hooks/use-toast';
-import { v4 as uuid } from 'uuid';
+// 移除未使用的uuid导入;
 
 interface FastDFSConfig {
   trackerServer: string;
@@ -165,13 +165,7 @@ export async function uploadImageByFastDFS(file: File): Promise<string | undefin
       return undefined;
     }
     
-    // 生成文件名
-    const id = uuid();
-    const ext = file.name.split('.').pop() || 'jpg';
-    const filename = `${id}.${ext}`.replace(/\s/g, '_');
-    const groupName = config.groupName || 'group1';
-
-      // 使用后端API进行FastDFS上传，通过invoke函数调用
+    // 使用后端API进行FastDFS上传，通过invoke函数调用
     console.log('Uploading image to FastDFS via backend API');
     console.log('FastDFS Config:', config);
     

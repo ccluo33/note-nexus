@@ -164,7 +164,8 @@ export class MCPClient {
   /**
    * 发送 stdio 请求
    */
-  private async sendStdioRequest(request: JSONRPCRequest): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async sendStdioRequest(_request: JSONRPCRequest): Promise<any> {
     // 浏览器环境不支持 stdio 请求
     throw new Error('Stdio requests are not supported in browser environment')
   }

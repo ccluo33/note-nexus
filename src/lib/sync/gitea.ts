@@ -41,10 +41,7 @@ async function getCommonHeaders(): Promise<any> {
   return headers;
 }
 
-// 获取代理配置 - 浏览器环境不支持直接设置代理
-async function getProxyConfig(): Promise<undefined> {
-  return undefined;
-}
+// 浏览器环境不支持直接设置代理
 
 /**
  * 上传文件到 Gitea 仓库
@@ -155,14 +152,13 @@ export async function getFiles({ path, repo }: { path: string; repo: string }) {
 
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const url = `${baseUrl}/repos/${giteaUsername}/${repo}/contents/${path}`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -226,7 +222,7 @@ export async function deleteFile({ path, sha, repo }: { path: string; sha?: stri
 
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // 如果没有 sha，先获取文件信息
     let fileSha = sha;
@@ -234,8 +230,7 @@ export async function deleteFile({ path, sha, repo }: { path: string; sha?: stri
       const fileUrl = `${baseUrl}/repos/${giteaUsername}/${repo}/contents/${path}`;
       const fileResponse = await fetch(fileUrl, {
         method: 'GET',
-        headers,
-        proxy
+        headers
       });
       
       if (fileResponse.ok) {
@@ -253,8 +248,7 @@ export async function deleteFile({ path, sha, repo }: { path: string; sha?: stri
         branch: 'main',
         message: `Delete ${path}`,
         sha: fileSha
-      }),
-      proxy
+      })
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -293,15 +287,14 @@ export async function getFileCommits({ path, repo }: { path: string; repo: strin
 
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // Gitea API 需要指定分支（sha 参数），默认使用 main 分支
     const url = `${baseUrl}/repos/${giteaUsername}/${repo}/commits?sha=main&path=${path}`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -334,15 +327,14 @@ export async function getFileContent({ path, ref, repo }: { path: string; ref: s
 
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // 获取特定 commit 的文件内容
     const url = `${baseUrl}/repos/${giteaUsername}/${repo}/contents/${path}?ref=${ref}`;
 
     const response = await encodeFetch(url, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     } as any);
 
     if (response.status >= 200 && response.status < 300) {
@@ -391,7 +383,7 @@ export async function getUserInfo(token?: string): Promise<GiteaUserInfo> {
     }
 
     const baseUrl = await getGiteaApiBaseUrl();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const headers = new Headers();
     headers.append('Authorization', `token ${accessToken}`);
@@ -399,8 +391,7 @@ export async function getUserInfo(token?: string): Promise<GiteaUserInfo> {
 
     const response = await fetch(`${baseUrl}/user`, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -445,15 +436,14 @@ export async function checkSyncRepoState(name: string): Promise<GiteaRepositoryI
 
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     // 直接尝试获取仓库信息
     const repoUrl = `${baseUrl}/repos/${giteaUsername}/${name}`;
     
     const response = await fetch(repoUrl, {
       method: 'GET',
-      headers,
-      proxy
+      headers
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -486,7 +476,7 @@ export async function createSyncRepo(name: string, isPrivate: boolean = true): P
   try {
     const baseUrl = await getGiteaApiBaseUrl();
     const headers = await getCommonHeaders();
-    const proxy = await getProxyConfig();
+    // 浏览器环境不支持直接设置proxy
 
     const requestBody = {
       name: name,
@@ -499,8 +489,7 @@ export async function createSyncRepo(name: string, isPrivate: boolean = true): P
     const response = await fetch(`${baseUrl}/user/repos`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(requestBody),
-      proxy
+      body: JSON.stringify(requestBody)
     });
 
     if (response.status >= 200 && response.status < 300) {

@@ -31,7 +31,7 @@ export async function upsertVectorDocument(doc: Omit<VectorDocument, 'id'>) {
 }
 
 // 获取指定文件名的所有向量文档（保持兼容，当前未使用）
-export async function getVectorDocumentsByFilename(filename: string) {
+export async function getVectorDocumentsByFilename() {
   // 目前前端不需要直接获取向量文档，此函数保持兼容
   return [];
 }
@@ -58,6 +58,8 @@ export async function getSimilarDocuments(
   limit: number = 5,
   threshold: number = 0.7
 ): Promise<{id: number, filename: string, content: string, similarity: number}[]> {
+  console.log(`开始向量检索，查询向量维度: ${queryEmbedding.length}, 限制数量: ${limit}, 相似度阈值: ${threshold}`);
+  
   const result = await invoke<any>('vector_similar', {
     query_embedding: queryEmbedding,
     limit: limit,
@@ -65,6 +67,11 @@ export async function getSimilarDocuments(
   });
   
   if (result?.status === 'success' && result?.data) {
+    console.log(`向量检索成功，返回 ${result.data.length} 个结果:`);
+    result.data.forEach((doc: any, index: number) => {
+      console.log(`  结果 ${index + 1}: 文件名=${doc.filename}, 相似度=${doc.similarity}, 内容预览=${doc.content.substring(0, 100)}...`);
+    });
+    
     // 将后端返回的结果转换为前端期望的格式
     return result.data.map((doc: any) => ({
       id: parseInt(doc.id.split('_')[1]) || 0,  // 从doc_id中提取chunk_id作为id
@@ -72,30 +79,11 @@ export async function getSimilarDocuments(
       content: doc.content,
       similarity: doc.similarity
     }));
+  } else {
+    console.log('向量检索失败或返回空结果:', result);
   }
   
   return [];
-}
-
-// 余弦相似度计算（保持兼容，可能仍有其他地方使用）
-function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  if (vecA.length !== vecB.length) {
-    throw new Error('向量维度不匹配');
-  }
-  
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  
-  for (let i = 0; i < vecA.length; i++) {
-    dotProduct += vecA[i] * vecB[i];
-    normA += vecA[i] * vecA[i];
-    normB += vecB[i] * vecB[i];
-  }
-  
-  if (normA === 0 || normB === 0) return 0;
-  
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
 // 清空向量数据库（保持兼容，实际实现在后端）

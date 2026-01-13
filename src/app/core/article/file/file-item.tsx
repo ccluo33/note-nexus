@@ -2,6 +2,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 import { Input } from "@/components/ui/input";
 import useArticleStore, { DirTree } from "@/stores/article";
 import { BaseDirectory, exists, readTextFile, remove, rename, writeTextFile } from "@/lib/browser-adapter/fs";
+import { deleteVectorDocumentsByFilename } from "@/db/vector";
 import { Cloud, CloudDownload, File, ImageIcon } from "lucide-react"
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ask } from "@/lib/browser-adapter/dialog";
@@ -15,7 +16,7 @@ import { useTranslations } from "next-intl";
 import useClipboardStore from "@/stores/clipboard";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { convertImageByWorkspace } from "@/lib/utils";
-import { appDataDir, join } from '@/lib/browser-adapter/path';
+// 移除未使用的导入
 import { deleteFile } from "@/lib/sync/github";
 import { deleteFile as deleteGiteeFile } from "@/lib/sync/gitee";
 import { deleteFile as deleteGitlabFile } from "@/lib/sync/gitlab";
@@ -136,6 +137,9 @@ export function FileItem({ item }: { item: DirTree }) {
           await remove(pathOptions.path, { baseDir: pathOptions.baseDir })
         }
         
+        // 删除向量数据库中的对应记录
+        await deleteVectorDocumentsByFilename(path)
+        
         // 更新文件树
         if (currentFolder) {
           const index = currentFolder.children?.findIndex(file => file.name === item.name)
@@ -195,6 +199,9 @@ export function FileItem({ item }: { item: DirTree }) {
             break;
         }
         
+        // 删除向量数据库中的对应记录
+        await deleteVectorDocumentsByFilename(activeFilePath)
+        
         // 更新文件树
         await loadFileTree()
 
@@ -250,7 +257,8 @@ export function FileItem({ item }: { item: DirTree }) {
           currentFolder.children[fileIndex].name = displayName
           currentFolder.children[fileIndex].isEditing = false
           if (item.name === '') {
-            const parentPath = path.split('/').slice(0, -1).join('/')
+            // 对于新文件，使用父文件夹的完整路径
+            const parentPath = currentFolder.path ? currentFolder.path : ''
             currentFolder.children[fileIndex].path = parentPath ? `${parentPath}/${displayName}` : displayName
           }
         }
@@ -260,8 +268,8 @@ export function FileItem({ item }: { item: DirTree }) {
           cacheTree[fileIndex].name = displayName
           cacheTree[fileIndex].isEditing = false
           if (item.name === '') {
-            const parentPath = path.split('/').slice(0, -1).join('/')
-            cacheTree[fileIndex].path = parentPath ? `${parentPath}/${displayName}` : displayName
+            // 对于根目录的新文件，直接使用文件名作为路径
+            cacheTree[fileIndex].path = displayName
           }
         }
       }
