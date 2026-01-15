@@ -3,6 +3,7 @@
 import { ThemeProvider } from "@/components/theme-provider"
 import useSettingStore from "@/stores/setting"
 import { useEffect, useState } from "react";
+import { applyThemeColors } from "@/lib/theme-utils"
 import { initAllDatabases } from "@/db"
 import dayjs from "dayjs"
 import zh from "dayjs/locale/zh-cn";
@@ -25,7 +26,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { initSettingData, uiScale, customCss } = useSettingStore()
+  const { initSettingData, uiScale, customCss, customThemeColors } = useSettingStore()
   const { initMainHosting } = useImageStore()
   const { currentLocale } = useI18n()
   const { initShortcut } = useShortcutStore()
@@ -79,6 +80,13 @@ export default function RootLayout({
       styleElement.textContent = customCss
     }
   }, [customCss])
+
+  // 应用自定义主题颜色
+  useEffect(() => {
+    if (customThemeColors) {
+      applyThemeColors(customThemeColors)
+    }
+  }, [customThemeColors])
 
   useEffect(() => {
     switch (currentLocale) {

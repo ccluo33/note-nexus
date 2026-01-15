@@ -1,11 +1,15 @@
 
 import { load } from '@/lib/browser-adapter/db';
+import type { Database } from '@/lib/browser-adapter/db';
 
 // 导出数据库实例
-export const db = await load('note.db');
+export let db: Database;
 
 // 获取数据库实例(兼容旧代码)
 export async function getDb() {
+  if (!db) {
+    db = await load('note.db');
+  }
   return db;
 }
 

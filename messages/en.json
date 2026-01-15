@@ -65,6 +65,103 @@
           "placeholder": "Enter custom CSS code here",
           "save": "Save",
           "cancel": "Cancel"
+        },
+        "customTheme": {
+          "title": "Custom Theme Colors",
+          "desc": "Customize the application's theme colors, including background, foreground, border, etc.",
+          "button": "Edit Colors",
+          "dialogTitle": "Custom Theme Colors",
+          "dialogDesc": "Configure custom theme colors. Changes are saved in real-time and override both light and dark themes.",
+          "close": "Close",
+          "reset": "Reset All",
+          "tabs": {
+            "custom": "Custom",
+            "presets": "Presets",
+            "importExport": "Import-Export"
+          },
+          "presets": {
+            "name": "Name",
+            "reset": {
+              "name": "Reset Default"
+            },
+            "ocean": {
+              "name": "Ocean Blue",
+              "desc": "Fresh ocean blue tones"
+            },
+            "sunset": {
+              "name": "Sunset Orange",
+              "desc": "Warm sunset orange tones"
+            },
+            "forest": {
+              "name": "Forest Green",
+              "desc": "Natural forest green tones"
+            },
+            "lavender": {
+              "name": "Lavender Purple",
+              "desc": "Soft lavender purple tones"
+            },
+            "midnight": {
+              "name": "Midnight Blue",
+              "desc": "Mysterious midnight blue tones"
+            },
+            "deepSea": {
+              "name": "Deep Sea",
+              "desc": "Deep sea blue tones"
+            },
+            "darkForest": {
+              "name": "Dark Forest",
+              "desc": "Mysterious dark forest tones"
+            },
+            "darkViolet": {
+              "name": "Dark Violet",
+              "desc": "Elegant dark violet tones"
+            },
+            "coralWarm": {
+              "name": "Coral Warm",
+              "desc": "Warm coral tones"
+            },
+            "slateGray": {
+              "name": "Slate Gray",
+              "desc": "Calm slate gray tones"
+            },
+            "darkGold": {
+              "name": "Dark Gold",
+              "desc": "Luxurious dark gold tones"
+            }
+          },
+          "colors": {
+            "background": "Background",
+            "foreground": "Foreground",
+            "card": "Card",
+            "cardForeground": "Card Foreground",
+            "primary": "Primary",
+            "primaryForeground": "Primary Foreground",
+            "secondary": "Secondary",
+            "secondaryForeground": "Secondary Foreground",
+            "third": "Third",
+            "thirdForeground": "Third Foreground",
+            "muted": "Muted",
+            "mutedForeground": "Muted Foreground",
+            "accent": "Accent",
+            "accentForeground": "Accent Foreground",
+            "border": "Border",
+            "shadow": "Shadow"
+          },
+          "export": {
+            "title": "Export Theme",
+            "desc": "Export current theme color configuration as JSON code",
+            "button": "Export",
+            "placeholder": "Exported JSON code will appear here"
+          },
+          "import": {
+            "title": "Import Theme",
+            "desc": "Paste JSON code to import theme color configuration",
+            "button": "Import",
+            "placeholder": "Paste JSON code here",
+            "invalidFormat": "Invalid JSON format",
+            "importSuccess": "Theme imported successfully",
+            "importError": "Theme import failed"
+          }
         }
       },
       "tools": {

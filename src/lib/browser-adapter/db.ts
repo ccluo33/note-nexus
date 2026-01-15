@@ -73,7 +73,8 @@ class IndexedDBDatabase implements Database {
   private async ensureInit(): Promise<void> {
     // 检查是否在浏览器环境中
     if (typeof window === 'undefined' || typeof indexedDB === 'undefined') {
-      throw new Error('IndexedDB is only available in browser environment');
+      // 服务器端渲染时，延迟初始化
+      return Promise.resolve();
     }
     if (!this.db) {
       await this.init();
@@ -114,29 +115,67 @@ class IndexedDBDatabase implements Database {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async select<T = any>(query: string, _bindValues?: any[]): Promise<T[]> {
+  async select<T = any>(query: string, bindValues?: any[]): Promise<T[]> {
     await this.ensureInit();
     
-    // 简单的 SELECT 解析
-    const match = query.match(/FROM\s+(\w+)/i);
-    if (!match) return [];
+    // 解析 FROM 子句获取表名
+    const fromMatch = query.match(/FROM\s+(\w+)/i);
+    if (!fromMatch) return [];
     
-    const tableName = match[1];
+    const tableName = fromMatch[1];
     const actualStoreName = this.getActualStoreName(tableName);
     if (!this.db) return [];
     
-    return new Promise((resolve, reject) => {
+    // 获取所有记录
+    const results = await new Promise<any[]>((resolve, reject) => {
       const transaction = this.db!.transaction([actualStoreName], 'readonly');
       const store = transaction.objectStore(actualStoreName);
       const request = store.getAll();
       
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
-        const results = request.result || [];
-        
-        resolve(results as T[]);
+        resolve(request.result || []);
       };
     });
+    
+    // 解析并应用 WHERE 条件
+    let filteredResults = [...results];
+    const whereMatch = query.match(/WHERE\s+(.+?)(?=\s+(ORDER BY|LIMIT|$))/i);
+    if (whereMatch && bindValues) {
+      const whereClause = whereMatch[1];
+      
+      // 简单解析 WHERE 条件（仅支持 = 操作符）
+      const conditionMatch = whereClause.match(/(\w+)\s*=\s*\$(\d+)/i);
+      if (conditionMatch) {
+        const column = conditionMatch[1];
+        const valueIndex = parseInt(conditionMatch[2]) - 1;
+        const value = bindValues[valueIndex];
+        
+        filteredResults = filteredResults.filter(item => item[column] === value);
+      }
+    }
+    
+    // 解析并应用 ORDER BY 子句
+    const orderMatch = query.match(/ORDER BY\s+([\w\s,]+)(?=\s+LIMIT|$)/i);
+    if (orderMatch) {
+      const orderBy = orderMatch[1];
+      const [column, direction] = orderBy.trim().split(/\s+/i);
+      
+      filteredResults.sort((a, b) => {
+        if (a[column] < b[column]) return direction?.toUpperCase() === 'DESC' ? 1 : -1;
+        if (a[column] > b[column]) return direction?.toUpperCase() === 'DESC' ? -1 : 1;
+        return 0;
+      });
+    }
+    
+    // 解析并应用 LIMIT 子句
+    const limitMatch = query.match(/LIMIT\s+(\d+)/i);
+    if (limitMatch) {
+      const limit = parseInt(limitMatch[1]);
+      filteredResults = filteredResults.slice(0, limit);
+    }
+    
+    return filteredResults as T[];
   }
 
   private async handleInsert(query: string, bindValues?: any[]): Promise<{ lastInsertId?: number; rowsAffected?: number; rows: any[] }> {

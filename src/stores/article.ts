@@ -341,7 +341,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
           createdAt: undefined,
           modifiedAt: undefined,
           children: file.isDirectory ? [] : undefined,
-          path: file.name // 为根目录项设置路径
+          path: file.name // 使用文件名作为相对工作区路径
         }))
     } else {
       // 默认工作区
@@ -355,12 +355,15 @@ const useArticleStore = create<NoteState>((set, get) => ({
           createdAt: undefined,
           modifiedAt: undefined,
           children: file.isDirectory ? [] : undefined,
-          path: file.name // 为根目录项设置路径
+          path: file.name // 使用文件名作为相对工作区路径
         }))
     }
     
     // 将 rootItems 重命名为 dirs，保持后续代码兼容
     let dirs = rootItems
+    
+    // 确保 collapsibleList 已初始化
+    await get().initCollapsibleList()
     
     // 为已展开的文件夹加载子内容
     const collapsibleList = get().collapsibleList
@@ -389,7 +392,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
           const pathOptions = await getFilePathOptions(dirRelative)
           dirExists = await exists(pathOptions.path, { baseDir: pathOptions.baseDir })
         }
-      } catch {
+      } catch (error) {
+        console.error('目录存在检查失败:', error)
         dirExists = false
       }
       
@@ -397,36 +401,36 @@ const useArticleStore = create<NoteState>((set, get) => ({
       if (dirExists) {
         try {
           if (workspace.isCustom) {
-            children = (await readDir(fullPath))
-              .filter(file => file.name !== '.DS_Store' && !file.name.startsWith('.') && (file.isDirectory || file.name.endsWith('.md') || file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)))
-              .map(file => ({
-                ...file,
-                parent: folder,
-                isEditing: false,
-                isLocale: true,
-                sha: '',
-                createdAt: undefined,
-                modifiedAt: undefined,
-                children: file.isDirectory ? [] : undefined,
-                path: `${folderPath}/${file.name}` // 设置完整路径
-              })) as DirTree[]
-          } else {
-            const dirRelative = await toWorkspaceRelativePath(fullPath)
-            const pathOptions = await getFilePathOptions(dirRelative)
-            children = (await readDir(pathOptions.path, { baseDir: pathOptions.baseDir }))
-              .filter(file => file.name !== '.DS_Store' && !file.name.startsWith('.') && (file.isDirectory || file.name.endsWith('.md') || file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)))
-              .map(file => ({
-                ...file,
-                parent: folder,
-                isEditing: false,
-                isLocale: true,
-                sha: '',
-                createdAt: undefined,
-                modifiedAt: undefined,
-                children: file.isDirectory ? [] : undefined,
-                path: `${folderPath}/${file.name}` // 设置完整路径
-              })) as DirTree[]
-          }
+        children = (await readDir(fullPath))
+          .filter(file => file.name !== '.DS_Store' && !file.name.startsWith('.') && (file.isDirectory || file.name.endsWith('.md') || file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)))
+          .map(file => ({
+            ...file,
+            parent: folder,
+            isEditing: false,
+            isLocale: true,
+            sha: '',
+            createdAt: undefined,
+            modifiedAt: undefined,
+            children: file.isDirectory ? [] : undefined,
+            path: `${folderPath}/${file.name}` // 使用相对于工作区的路径
+          })) as DirTree[]
+      } else {
+        const dirRelative = await toWorkspaceRelativePath(fullPath)
+        const pathOptions = await getFilePathOptions(dirRelative)
+        children = (await readDir(pathOptions.path, { baseDir: pathOptions.baseDir }))
+          .filter(file => file.name !== '.DS_Store' && !file.name.startsWith('.') && (file.isDirectory || file.name.endsWith('.md') || file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)))
+          .map(file => ({
+            ...file,
+            parent: folder,
+            isEditing: false,
+            isLocale: true,
+            sha: '',
+            createdAt: undefined,
+            modifiedAt: undefined,
+            children: file.isDirectory ? [] : undefined,
+            path: `${folderPath}/${file.name}` // 使用相对于工作区的路径
+          })) as DirTree[]
+      }
         } catch (error) {
           // 读取失败，使用空数组
           console.warn(`Failed to read local directory during init: ${fullPath}`, error)
@@ -615,6 +619,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
   },
   // 加载文件夹内部的本地和远程文件（按需加载）
   loadCollapsibleFiles: async (fullpath: string) => {
+    debugger
     const cacheTree: DirTree[] = get().fileTree
     const currentFolder = getCurrentFolder(fullpath, cacheTree)
     
@@ -668,7 +673,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
               createdAt: undefined,
               modifiedAt: undefined,
               children: file.isDirectory ? [] : undefined,
-              path: `${fullpath}/${file.name}`
+              path: `${fullpath}/${file.name}` // 使用相对于工作区的路径
             })) as DirTree[]
         } else {
           const dirRelative = await toWorkspaceRelativePath(fullFolderPath)
@@ -684,7 +689,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
               createdAt: undefined,
               modifiedAt: undefined,
               children: file.isDirectory ? [] : undefined,
-              path: `${fullpath}/${file.name}`
+              path: `${fullpath}/${file.name}` // 使用相对于工作区的路径
             })) as DirTree[]
         }
       } catch (error) {
@@ -821,7 +826,7 @@ const useArticleStore = create<NoteState>((set, get) => ({
   newFile: async () => {
     // 检查现有树中是否已有空文件名的文件（正在编辑中）
     const cacheTree = cloneDeep(get().fileTree)
-    
+    debugger
     // 优先使用选中的文件夹
     const selectedFolder = get().selectedFolder
     // 如果没有选中的文件夹，使用当前活动文件的父文件夹
@@ -895,7 +900,8 @@ const useArticleStore = create<NoteState>((set, get) => ({
     
     // 创建新文件
     const file = `新建文件-${new Date().getTime()}.md`
-    const fullPath = `${path}/${file}`
+    const relativePath = await toWorkspaceRelativePath(path)
+    const fullPath = `${relativePath}/${file}`
     const pathOptions = await getFilePathOptions(fullPath)
     
     // 写入空文件
@@ -939,9 +945,10 @@ const useArticleStore = create<NoteState>((set, get) => ({
     }
 
     // 更新树
+    const relativePath = await toWorkspaceRelativePath(path)
     const node = {
       name: '',
-      path: path ? `${path}/` : '',
+      path: relativePath ? `${relativePath}/` : '',
       isFile: false,
       isDirectory: true,
       isSymlink: false,

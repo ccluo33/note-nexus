@@ -6,6 +6,8 @@ import { GitlabInstanceType } from '@/lib/sync/gitlab.types'
 import { GiteaInstanceType } from '@/lib/sync/gitea.types'
 import { noteGenDefaultModels, noteGenModelKeys } from '@/app/model-config'
 import { fetch } from '@/lib/browser-adapter/http'
+import { CustomThemeColors } from '@/types/theme'
+import { applyThemeColors } from '@/lib/theme-utils'
 
 export enum GenTemplateRange {
   All = 'all',
@@ -208,6 +210,10 @@ interface SettingState {
   // 记录工具栏配置
   recordToolbarConfig: RecordToolbarItem[]
   setRecordToolbarConfig: (config: RecordToolbarItem[]) => Promise<void>
+
+  // 自定义主题颜色
+  customThemeColors: CustomThemeColors
+  resetCustomThemeColors: () => Promise<void>
 }
 
 export interface ChatToolbarItem {
@@ -926,6 +932,91 @@ const useSettingStore = create<SettingState>((set, get) => ({
     const store = await Store.load('store.json');
     await store.set('recordToolbarConfig', config)
     await store.save()
+  },
+
+  // 自定义主题颜色
+  customThemeColors: {
+    light: {
+      background: null,
+      foreground: null,
+      card: null,
+      cardForeground: null,
+      primary: null,
+      primaryForeground: null,
+      secondary: null,
+      secondaryForeground: null,
+      third: null,
+      thirdForeground: null,
+      muted: null,
+      mutedForeground: null,
+      accent: null,
+      accentForeground: null,
+      border: null,
+      shadow: null,
+    },
+    dark: {
+      background: null,
+      foreground: null,
+      card: null,
+      cardForeground: null,
+      primary: null,
+      primaryForeground: null,
+      secondary: null,
+      secondaryForeground: null,
+      third: null,
+      thirdForeground: null,
+      muted: null,
+      mutedForeground: null,
+      accent: null,
+      accentForeground: null,
+      border: null,
+      shadow: null,
+    },
+  },
+  resetCustomThemeColors: async () => {
+    const defaultColors = {
+      light: {
+        background: null,
+        foreground: null,
+        card: null,
+        cardForeground: null,
+        primary: null,
+        primaryForeground: null,
+        secondary: null,
+        secondaryForeground: null,
+        third: null,
+        thirdForeground: null,
+        muted: null,
+        mutedForeground: null,
+        accent: null,
+        accentForeground: null,
+        border: null,
+        shadow: null,
+      },
+      dark: {
+        background: null,
+        foreground: null,
+        card: null,
+        cardForeground: null,
+        primary: null,
+        primaryForeground: null,
+        secondary: null,
+        secondaryForeground: null,
+        third: null,
+        thirdForeground: null,
+        muted: null,
+        mutedForeground: null,
+        accent: null,
+        accentForeground: null,
+        border: null,
+        shadow: null,
+      },
+    }
+    const store = await Store.load('store.json')
+    await store.set('customThemeColors', defaultColors)
+    await store.save()
+    set({ customThemeColors: defaultColors })
+    applyThemeColors(defaultColors)
   },
 }))
 

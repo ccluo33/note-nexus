@@ -43,7 +43,21 @@ export async function getFilePathOptions(relativePath: string): Promise<{ path: 
     // 对于默认工作区，使用AppData作为baseDir
     // 检查相对路径是否已经以article/开头，避免重复添加
     let finalPath = relativePath
-    if (!finalPath.startsWith('article/') && !finalPath.startsWith('article')) {
+    
+    // 先移除开头的斜杠（如果有）
+    finalPath = finalPath.startsWith('/') ? finalPath.substring(1) : finalPath
+    
+    if (finalPath === '') {
+      // 空路径直接返回article
+      finalPath = 'article'
+    } else if (finalPath.startsWith('article/')) {
+      // 已经以article/开头，保持不变
+      finalPath = finalPath
+    } else if (finalPath === 'article') {
+      // 就是article本身，保持不变
+      finalPath = finalPath
+    } else {
+      // 其他情况，添加article/前缀
       finalPath = `article/${finalPath}`
     }
     return { 
@@ -77,16 +91,40 @@ export async function getGenericPathOptions(path: string, prefix?: string): Prom
     return { path: fullPath }
   } else {
     // 对于默认工作区，使用AppData作为baseDir
-    // 如果指定了prefix且path不以prefix开头，则添加prefix/
-    if (prefix && !path.startsWith(`${prefix}/`) && !path.startsWith(prefix)) {
-      return {
-        path: `${prefix}/${path}`,
-        baseDir: BaseDirectory.AppData
+    // 先移除开头的斜杠（如果有）
+    let finalPath = path.startsWith('/') ? path.substring(1) : path
+    
+    // 如果指定了prefix，确保路径正确
+    if (prefix) {
+      if (finalPath === '') {
+        // 空路径直接返回prefix
+        return {
+          path: prefix,
+          baseDir: BaseDirectory.AppData
+        }
+      } else if (finalPath.startsWith(`${prefix}/`)) {
+        // 已经以prefix/开头，保持不变
+        return {
+          path: finalPath,
+          baseDir: BaseDirectory.AppData
+        }
+      } else if (finalPath === prefix) {
+        // 就是prefix本身，保持不变
+        return {
+          path: finalPath,
+          baseDir: BaseDirectory.AppData
+        }
+      } else {
+        // 其他情况，添加prefix/前缀
+        return {
+          path: `${prefix}/${finalPath}`,
+          baseDir: BaseDirectory.AppData
+        }
       }
     }
     
     return { 
-      path: path, 
+      path: finalPath, 
       baseDir: BaseDirectory.AppData 
     }
   }
@@ -100,20 +138,27 @@ export async function getGenericPathOptions(path: string, prefix?: string): Prom
 export async function toWorkspaceRelativePath(path: string): Promise<string> {
   const workspace = await getWorkspacePath()
   
-  const defaultDirRegex = /^(article[\\\/])/
+  // 先移除开头的斜杠（如果有）
+  let normalizedPath = path.startsWith('/') ? path.substring(1) : path
+  
   // 如果是默认工作区，移除"article/"前缀
-  if (!workspace.isCustom && defaultDirRegex.test(path)) {
-    return path.replace(/article[\\\/]/g, '')
+  if (!workspace.isCustom) {
+    // 使用正确的正则表达式处理路径分隔符
+    const defaultDirRegex = /^article\//
+    if (defaultDirRegex.test(normalizedPath)) {
+      // 移除article/前缀
+      return normalizedPath.replace(defaultDirRegex, '')
+    }
   }
   
   // 如果是自定义工作区，移除工作区路径前缀
-  if (workspace.isCustom && path.startsWith(workspace.path)) {
+  if (workspace.isCustom && normalizedPath.startsWith(workspace.path)) {
     // 确保路径分隔符处理正确
-    const relativePath = path.substring(workspace.path.length)
+    const relativePath = normalizedPath.substring(workspace.path.length)
     // 移除开头的斜杠（如果有）
-    return relativePath.startsWith('/') ? relativePath.substring(1) : relativePath
+    return relativePath.startsWith('/') || relativePath.startsWith('\\') ? relativePath.substring(1) : relativePath
   }
   
   // 如果路径已经是相对路径，直接返回
-  return path
+  return normalizedPath
 }

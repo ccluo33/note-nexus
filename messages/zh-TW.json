@@ -63,6 +63,103 @@
           "placeholder": "在此輸入自訂 CSS 代碼。",
           "save": "保存",
           "cancel": "取消"
+        },
+        "customTheme": {
+          "title": "自訂主題顏色",
+          "desc": "自訂應用的主題顏色，包括背景色、前景色、邊框色等",
+          "button": "編輯顏色",
+          "dialogTitle": "自訂主題顏色",
+          "dialogDesc": "配置自訂主題顏色。顏色更改會實時保存並生效，同時覆蓋亮色和暗色主題。",
+          "close": "關閉",
+          "reset": "重置全部",
+          "tabs": {
+            "custom": "自訂",
+            "presets": "預設方案",
+            "importExport": "導入導出"
+          },
+          "presets": {
+            "name": "名稱",
+            "reset": {
+              "name": "恢復預設"
+            },
+            "ocean": {
+              "name": "海洋藍",
+              "desc": "清新的海洋藍色調"
+            },
+            "sunset": {
+              "name": "日落橙",
+              "desc": "溫暖的日落橙色調"
+            },
+            "forest": {
+              "name": "森林綠",
+              "desc": "自然的森林綠色調"
+            },
+            "lavender": {
+              "name": "薰衣草紫",
+              "desc": "柔和的薰衣草紫色調"
+            },
+            "midnight": {
+              "name": "午夜藍",
+              "desc": "神秘的午夜藍色調"
+            },
+            "deepSea": {
+              "name": "深海藍",
+              "desc": "深邃的深海藍色調"
+            },
+            "darkForest": {
+              "name": "暗森林",
+              "desc": "神秘的暗森林色調"
+            },
+            "darkViolet": {
+              "name": "暗紫羅蘭",
+              "desc": "優雅的暗紫羅蘭色調"
+            },
+            "coralWarm": {
+              "name": "珊瑚暖",
+              "desc": "溫暖的珊瑚色調"
+            },
+            "slateGray": {
+              "name": "石板灰",
+              "desc": "沉穩的石板灰色調"
+            },
+            "darkGold": {
+              "name": "暗金色",
+              "desc": "奢華的暗金色調"
+            }
+          },
+          "colors": {
+            "background": "背景色",
+            "foreground": "前景色",
+            "card": "卡片色",
+            "cardForeground": "卡片前景色",
+            "primary": "主色",
+            "primaryForeground": "主色前景色",
+            "secondary": "次色",
+            "secondaryForeground": "次色前景色",
+            "third": "第三色",
+            "thirdForeground": "第三色前景色",
+            "muted": "靜音色",
+            "mutedForeground": "靜音前景色",
+            "accent": "強調色",
+            "accentForeground": "強調前景色",
+            "border": "邊框色",
+            "shadow": "陰影色"
+          },
+          "export": {
+            "title": "導出主題",
+            "desc": "將當前主題顏色配置導出為 JSON 代碼",
+            "button": "導出",
+            "placeholder": "導出的 JSON 代碼將顯示在這裡"
+          },
+          "import": {
+            "title": "導入主題",
+            "desc": "粘貼 JSON 代碼導入主題顏色配置",
+            "button": "導入",
+            "placeholder": "在此粘貼 JSON 代碼",
+            "invalidFormat": "無效的 JSON 格式",
+            "importSuccess": "主題導入成功",
+            "importError": "主題導入失敗"
+          }
         }
       },
       "tools": {

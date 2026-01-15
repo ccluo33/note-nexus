@@ -2,12 +2,12 @@
   @apply border-none;
 
   pre {
-    @apply dark:bg-zinc-950 !important;
+    @apply bg-background !important;
   }
 }
 
 .vditor-toolbar{
-  @apply border-b bg-transparent !px-4 h-12 flex items-center justify-center;
+  @apply border-b border-border bg-transparent !px-4 h-12 flex items-center justify-center;
   .vditor-toolbar__item{
     @apply h-9 w-9 flex items-center justify-center;
     svg {
@@ -32,7 +32,7 @@
 
 .vditor--dark .vditor-reset{
   h1, h2, h3, h4, h5, h6, p, span, li {
-    @apply text-zinc-100 !important;
+    @apply text-foreground !important;
   }
 }
 
@@ -45,30 +45,92 @@
   display: none;
 }
 
+/* 覆盖 Vditor 默认的代码块背景色 - 亮色模式 */
+.vditor:not(.vditor--dark) .vditor-reset code:not(.hljs):not(.highlight-chroma) {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  color: hsl(var(--foreground));
+}
+
+/* 覆盖 Vditor 默认的代码块背景色 - 暗色模式 */
+.vditor--dark .vditor-reset code:not(.hljs):not(.highlight-chroma) {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  color: hsl(var(--foreground));
+}
+
+/* 覆盖 Vditor 代码高亮块背景色 - 使用主题变量 */
+.vditor .vditor-reset pre.hljs,
+.vditor .vditor-reset pre.highlight-chroma,
+.vditor .vditor-reset .hljs,
+.vditor .vditor-reset .highlight-chroma {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 覆盖 Vditor 代码高亮块内的代码背景色 */
+.vditor .vditor-reset pre.hljs code,
+.vditor .vditor-reset pre.highlight-chroma code,
+.vditor .vditor-reset .hljs code,
+.vditor .vditor-reset .highlight-chroma code {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 覆盖 Vditor 表格背景色 */
+.vditor .vditor-reset table tr {
+  background-color: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.vditor .vditor-reset table tr:nth-child(2n) {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+
+.vditor .vditor-reset table th,
+.vditor .vditor-reset table td {
+  border-color: hsl(var(--border)) !important;
+  background-color: transparent !important;
+}
+
+.vditor .vditor-reset table th {
+  background-color: hsl(var(--muted) / 0.3) !important;
+}
+
+/* 覆盖 Vditor blockquote 样式 */
+.vditor .vditor-reset blockquote {
+  border-left-color: hsl(var(--border)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* 覆盖 Vditor hr 分隔线颜色 */
+.vditor .vditor-reset hr {
+  background-color: hsl(var(--border)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
 .vditor {
-  --border-color: rgb(228, 228, 231);
-  --second-color: rgba(88, 96, 105, 0.36);
+  --border-color: hsl(var(--border));
+  --second-color: hsl(var(--muted-foreground) / 0.36);
 
-  --panel-background-color: #fff;
-  --panel-shadow: #000;
+  --panel-background-color: hsl(var(--background));
+  --panel-shadow: hsl(var(--foreground));
 
-  --toolbar-background-color: #f6f8fa;
-  --toolbar-icon-color: #586069;
-  --toolbar-icon-hover-color: @blurColor;
+  --toolbar-background-color: hsl(var(--accent));
+  --toolbar-icon-color: hsl(var(--muted-foreground));
+  --toolbar-icon-hover-color: hsl(var(--foreground) / 0.8);
   --toolbar-height: 35px;
   --toolbar-divider-margin-top: 8px;
 
-  --textarea-background-color: #fff;
-  --textarea-text-color: #24292e;
+  --textarea-background-color: hsl(var(--background));
+  --textarea-text-color: hsl(var(--foreground));
 
   --resize-icon-color: var(--toolbar-icon-color);
   --resize-background-color: var(--toolbar-background-color);
   --resize-hover-icon-color: var(--panel-background-color);
   --resize-hover-background-color: var(--toolbar-icon-hover-color);
 
-  --count-background-color: rgba(27, 31, 35, 0.05);
-  --heading-border-color: #eaecef;
-  --blockquote-color: #6a737d;
+  --count-background-color: hsl(var(--foreground) / 0.05);
+  --heading-border-color: hsl(var(--border));
+  --blockquote-color: hsl(var(--muted-foreground));
 
   --ir-heading-color: #660e7a;
   --ir-title-color: #808080;
@@ -78,25 +140,25 @@
   --ir-paren-color: #008000;
 
   &--dark {
-    --border-color: rgb(39, 39, 42);
-    --second-color: rgba(185, 185, 185, 0.36);
+    --border-color: hsl(var(--border));
+    --second-color: hsl(var(--muted-foreground) / 0.36);
 
-    --panel-background-color: #000;
-    --panel-shadow: #000;
+    --panel-background-color: hsl(var(--background));
+    --panel-shadow: hsl(var(--foreground));
 
-    --toolbar-background-color: #000;
-    --toolbar-icon-color: #b9b9b9;
-    --toolbar-icon-hover-color: #fff;
+    --toolbar-background-color: hsl(var(--background));
+    --toolbar-icon-color: hsl(var(--muted-foreground));
+    --toolbar-icon-hover-color: hsl(var(--foreground));
 
-    --textarea-background-color: #000;
-    --textarea-text-color: #d1d5da;
+    --textarea-background-color: hsl(var(--background));
+    --textarea-text-color: hsl(var(--foreground));
 
     --resize-icon-color: var(--border-color);
     --resize-background-color: var(--second-color);
     --resize-hover-icon-color: var(--toolbar-icon-hover-color);
-    --resize-hover-background-color: rgba(185, 185, 185, 0.86);
+    --resize-hover-background-color: hsl(var(--foreground) / 0.86);
 
-    --count-background-color: rgba(@blurColor, 0.36);
+    --count-background-color: hsl(var(--foreground) / 0.36);
     --heading-border-color: var(--textarea-text-color);
     --blockquote-color: var(--toolbar-icon-color);
 
@@ -114,7 +176,7 @@
 }
 
 .vditor-hint{
-  @apply min-w-[8rem] overflow-hidden rounded-md border bg-popover;
+  @apply min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover;
   button {
     @apply text-xs text-primary cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 outline-none;
   }

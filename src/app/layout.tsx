@@ -1,7 +1,7 @@
 'use client'
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.scss";
-import 'react-photo-view/dist/react-photo-view.css';
+// import 'react-photo-view/dist/react-photo-view.css';
 import { Suspense } from "react";
 import { NextIntlProvider } from "@/components/providers/NextIntlProvider";
 import Script from "next/script";

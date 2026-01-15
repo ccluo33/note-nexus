@@ -95,24 +95,42 @@ class IndexedDBFileSystem {
 
       const transaction = this.db.transaction(['files'], 'readonly');
       const store = transaction.objectStore('files');
-      const request = store.get(normalizedPath);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const result = request.result;
-        if (result && result.content) {
-          if (result.isBinary) {
-            // 处理二进制数据，转换为字符串
-            const binaryContent = result.content as ArrayBuffer;
+      
+      // 检查原始路径
+      const request1 = store.get(normalizedPath);
+      
+      request1.onerror = () => reject(request1.error);
+      request1.onsuccess = () => {
+        const result1 = request1.result;
+        if (result1 && result1.content) {
+          // 找到原始路径的内容
+          if (result1.isBinary) {
+            const binaryContent = result1.content as ArrayBuffer;
             const text = new TextDecoder().decode(binaryContent);
             resolve(text);
           } else {
-            // 直接返回文本数据
-            resolve(result.content as string);
+            resolve(result1.content as string);
           }
         } else {
-          // 文件不存在时返回空字符串，而不是抛出错误
-          resolve('');
+          // 检查带斜杠结尾的路径（目录）
+          const request2 = store.get(`${normalizedPath}/`);
+          request2.onerror = () => reject(request2.error);
+          request2.onsuccess = () => {
+            const result2 = request2.result;
+            if (result2 && result2.content) {
+              // 找到带斜杠路径的内容
+              if (result2.isBinary) {
+                const binaryContent = result2.content as ArrayBuffer;
+                const text = new TextDecoder().decode(binaryContent);
+                resolve(text);
+              } else {
+                resolve(result2.content as string);
+              }
+            } else {
+              // 文件不存在时返回空字符串，而不是抛出错误
+              resolve('');
+            }
+          };
         }
       };
     });
@@ -130,24 +148,42 @@ class IndexedDBFileSystem {
 
       const transaction = this.db.transaction(['files'], 'readonly');
       const store = transaction.objectStore('files');
-      const request = store.get(normalizedPath);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const result = request.result;
-        if (result && result.content) {
-          if (result.isBinary) {
-            // 处理二进制数据
-            const binaryContent = result.content as ArrayBuffer;
+      
+      // 检查原始路径
+      const request1 = store.get(normalizedPath);
+      
+      request1.onerror = () => reject(request1.error);
+      request1.onsuccess = () => {
+        const result1 = request1.result;
+        if (result1 && result1.content) {
+          // 找到原始路径的内容
+          if (result1.isBinary) {
+            const binaryContent = result1.content as ArrayBuffer;
             resolve(new Uint8Array(binaryContent));
           } else {
-            // 处理文本数据
             const encoder = new TextEncoder();
-            resolve(encoder.encode(result.content as string));
+            resolve(encoder.encode(result1.content as string));
           }
         } else {
-          // 文件不存在时返回空的Uint8Array，而不是抛出错误
-          resolve(new Uint8Array());
+          // 检查带斜杠结尾的路径（目录）
+          const request2 = store.get(`${normalizedPath}/`);
+          request2.onerror = () => reject(request2.error);
+          request2.onsuccess = () => {
+            const result2 = request2.result;
+            if (result2 && result2.content) {
+              // 找到带斜杠路径的内容
+              if (result2.isBinary) {
+                const binaryContent = result2.content as ArrayBuffer;
+                resolve(new Uint8Array(binaryContent));
+              } else {
+                const encoder = new TextEncoder();
+                resolve(encoder.encode(result2.content as string));
+              }
+            } else {
+              // 文件不存在时返回空的Uint8Array，而不是抛出错误
+              resolve(new Uint8Array());
+            }
+          };
         }
       };
     });
@@ -303,11 +339,23 @@ class IndexedDBFileSystem {
 
       const transaction = this.db.transaction(['files'], 'readonly');
       const store = transaction.objectStore('files');
-      const request = store.get(normalizedPath);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        resolve(!!request.result);
+      
+      // 检查原始路径
+      const request1 = store.get(normalizedPath);
+      
+      request1.onerror = () => reject(request1.error);
+      request1.onsuccess = () => {
+        if (request1.result) {
+          // 找到原始路径，直接返回true
+          resolve(true);
+        } else {
+          // 检查带斜杠结尾的路径（目录）
+          const request2 = store.get(`${normalizedPath}/`);
+          request2.onerror = () => reject(request2.error);
+          request2.onsuccess = () => {
+            resolve(!!request2.result);
+          };
+        }
       };
     });
   }
@@ -324,21 +372,42 @@ class IndexedDBFileSystem {
 
       const transaction = this.db.transaction(['files'], 'readonly');
       const store = transaction.objectStore('files');
-      const request = store.get(normalizedPath);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const result = request.result;
-        if (result) {
+      
+      // 检查原始路径
+      const request1 = store.get(normalizedPath);
+      
+      request1.onerror = () => reject(request1.error);
+      request1.onsuccess = () => {
+        const result1 = request1.result;
+        if (result1) {
+          // 文件或目录存在
           resolve({
-            isFile: !result.isDirectory,
-            isDirectory: result.isDirectory,
-            size: result.content?.length || 0,
-            mtime: result.updatedAt || Date.now(),
-            birthtime: result.createdAt || result.updatedAt || Date.now(),
+            isFile: !result1.isDirectory,
+            isDirectory: result1.isDirectory,
+            size: result1.content?.length || 0,
+            mtime: result1.updatedAt || Date.now(),
+            birthtime: result1.createdAt || result1.updatedAt || Date.now(),
           });
         } else {
-          reject(new Error(`File not found: ${normalizedPath}`));
+          // 检查带斜杠结尾的路径（目录）
+          const request2 = store.get(`${normalizedPath}/`);
+          request2.onerror = () => reject(request2.error);
+          request2.onsuccess = () => {
+            const result2 = request2.result;
+            if (result2) {
+              // 目录存在
+              resolve({
+                isFile: false,
+                isDirectory: true,
+                size: result2.content?.length || 0,
+                mtime: result2.updatedAt || Date.now(),
+                birthtime: result2.createdAt || result2.updatedAt || Date.now(),
+              });
+            } else {
+              // 文件或目录不存在
+              reject(new Error(`File not found: ${normalizedPath}`));
+            }
+          };
         }
       };
     });
