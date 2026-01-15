@@ -35,7 +35,7 @@ export function SettingTab({ onTabChange, activeTab }: { onTabChange: (tab: stri
             return (
               <li
                 key={item.anchor}
-                className={activeTab === item.anchor ? '!bg-zinc-800 text-white setting-anchor' : 'setting-anchor'}
+                className={activeTab === item.anchor ? '!bg-zinc-200 setting-anchor' : 'setting-anchor'}
                 onClick={() => handleNavigation(item.anchor)}
               >
                 {item.icon}
